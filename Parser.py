@@ -19,10 +19,10 @@ def parse_data(file_route, amount_attributes):
     for line in lines_of_data:
         split_line = line.split(",")
         lines_of_split_data.append(split_line)
-    class_id = lines_of_split_data[0][amount_attributes]
     profits = []
     lines_of_split_data = lines_of_split_data[0:len(lines_of_split_data)-1]
     for atribute in range(0, amount_attributes):
+        class_id = lines_of_split_data[0][amount_attributes]
         for split_line in lines_of_split_data:
             print(split_line)
             if (class_id != split_line[amount_attributes]):
@@ -30,15 +30,12 @@ def parse_data(file_route, amount_attributes):
                 profits.append((breakpoint_profit, split_line[atribute]))
                 class_id = split_line[amount_attributes]
         ideal_breakpoint = max(profits)
-        print(profits)
-
-        #chau
-        #hola
         for split_line in lines_of_split_data:
-            if ((float) (split_line[atribute]) <= ideal_breakpoint[0]):
+            if (float(split_line[atribute]) <= float(ideal_breakpoint[1])):
                 split_line[atribute] = 0
             else:
                 split_line[atribute] = 1
+        profits = []
     return lines_of_split_data
 
 
