@@ -31,6 +31,7 @@ def parse_data(file_route, amount_attributes):
                 class_id = split_line[amount_attributes]
         ideal_breakpoint = max(profits)
         print(profits)
+        #hola
         for split_line in lines_of_split_data:
             if ((float) (split_line[atribute]) <= ideal_breakpoint[0]):
                 split_line[atribute] = 0
