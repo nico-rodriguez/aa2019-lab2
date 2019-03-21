@@ -1,1 +1,1 @@
-{"Harry": {"children": ["Bill", {"Jane": {"children": [{"Diane": {"children": ["Mary"]}}, "Mark"]}}]}}
+{"Harry": {"children": [{"Bill": {"data": null}}, {"Jane": {"children": [{"Diane": {"children": [{"Mary": {"data": null}}], "data": null}}, {"Mark": {"data": [0, 1, 2]}}], "data": null}}], "data": [3, 2, 1]}}

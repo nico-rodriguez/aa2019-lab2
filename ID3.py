@@ -12,7 +12,8 @@ from Utils import profit
 
 # Saves the tree in treelib format into target_file in json format
 def save_tree(tree, target_file):
-    json_str = tree.to_json()
+    json_str = tree.to_json(with_data=True)
+    print(json_str)
     # Process json_str to a propper json format for load_tree
     json_str = json_str.replace("\\", "")
     with open(target_file, 'w') as outfile:
@@ -24,12 +25,26 @@ def __dictionary_to_tree(dictionary):
     if dictionary != {}:
         tree = Tree()
         root = list(dictionary.keys())[0]
-        tree.create_node(root, root)
+        if 'data' in list(dictionary[root].keys()):
+            tree.create_node(root, root, data=dictionary[root]['data'])
+        else:
+            tree.create_node(root, root)
         for value in dictionary[root]["children"]:
+            '''
             if (isinstance(value, dict)):
                 tree.paste(root, __dictionary_to_tree(value))
             else:
                 tree.create_node(value, value, parent=root)
+            '''
+            # Node is a leaf
+            if 'children' not in list(value[list(value.keys())[0]].keys()):
+                if 'data' in list(value[list(value.keys())[0]].keys()):
+                    tree.create_node(list(value.keys())[0], list(value.keys())[0], parent=root, data=value[list(value.keys())[0]]['data'])
+                else:
+                    tree.create_node(list(value.keys())[0], list(value.keys())[0], parent=root)
+            # Node is not leaf
+            else:
+                tree.paste(root, __dictionary_to_tree(value))
         return tree
     else:
         return Tree()
@@ -56,8 +71,8 @@ def ID3(data):
 ID3 algorithm.
 Recursively receives the training examples and the remaining attributes to
 process inside an instance of Data class.
-data is an instance of Data class.
-attributes is a list of indices that represent the remaining attributes.
+data is an instance of Data class. It has the remaining attributes to process.
+data.attributes is a list of indices that represent the remaining attributes.
 Returns a decision tree of treelib type.
 '''
 
@@ -116,16 +131,17 @@ def __ID3(data):
 
 if __name__ == "__main__":
     tree = Tree()
-    tree.create_node("Harry", "harry")  # root node
+    tree.create_node("Harry", "harry", data=[3, 2, 1])  # root node
     assert tree.get_node('harry').is_leaf()
     tree.create_node("Jane", "jane", parent="harry")
     tree.create_node("Bill", "bill", parent="harry")
     tree.create_node("Diane", "diane", parent="jane")
     tree.create_node("Mary", "mary", parent="diane")
-    tree.create_node("Mark", "mark", parent="jane")
+    tree.create_node("Mark", "mark", parent="jane", data=[0, 1, 2])
     save_tree(tree, "test.json")
     tree_test = load_tree("test.json")
     print(tree)
+    print(tree.leaves())
     # tree_test.paste('Mark', Tree())
     print(tree_test)
     save_tree(tree_test, "test2.json")
