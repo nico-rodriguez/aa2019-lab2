@@ -22,7 +22,7 @@ class Data:
             self.class_distribution = [1/3, 1/3, 1/3]
             self.dataset = Parser.parse_data("iris/iris.data", 4)
         else:
-            # TODOÑ check number of attributes of dataset (dataset info states
+            # TODO: check number of attributes of dataset (dataset info states
             # that there are 12 attributes, divided into 54 columns)
             self.amount_attributes = 12
             self.attribute_values = {
