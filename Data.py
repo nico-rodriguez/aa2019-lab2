@@ -10,8 +10,11 @@ import Parser
 class Data:
     def __init__(self, data_name):
         self.data_name = data_name
+        # Indicates if all instances belong to the same class
+        self.monoclass_instances = None
         if (data_name == "iris"):
             self.amount_attributes = 4
+            self.attributes = [0, 1, 2, 3]
             self.attribute_values = {
                 0: [0, 1], 1: [0, 1], 2: [0, 1], 3: [0, 1]
             }
@@ -25,6 +28,7 @@ class Data:
             # TODO: check number of attributes of dataset (dataset info states
             # that there are 12 attributes, divided into 54 columns)
             self.amount_attributes = 12
+            self.attributes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
             self.attribute_values = {
                 0: [0, 1], 1: [0, 1], 2: [0, 1], 3: [0, 1], 4: [0, 1],
                 5: [0, 1], 6: [0, 1], 7: [0, 1], 8: [0, 1], 9: [0, 1],
@@ -37,3 +41,4 @@ class Data:
                 2747/581012, 9493/581012, 17367/581012, 20510/581012
             ]
             self.dataset = Parser.parse_data("covtype/covtype.data", 7)
+
