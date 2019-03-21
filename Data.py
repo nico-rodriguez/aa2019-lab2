@@ -42,3 +42,8 @@ class Data:
             ]
             self.dataset = Parser.parse_data("covtype/covtype.data", 7)
 
+    # Project the instances across attribute, returning only those that match
+    # the value. Returned object is another instance of Data that doesn't
+    # share memory with the current instance.
+    def project_attribute(self, attribute, value):
+        pass
