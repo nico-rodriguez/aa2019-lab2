@@ -14,14 +14,14 @@ Returns the entropy of such a partition.
 '''
 
 
-def entropy(partitions):
-    entropy = 0
+def __entropy(partitions):
+    __entropy = 0
     for key in partitions:
         if partitions[key] > 0:
-            entropy -= partitions[key]*math.log2(partitions[key])
+            __entropy -= partitions[key]*math.log2(partitions[key])
         elif partitions[key] < 0:
-            return "Utils.entropy: numbers in partitions must be non-negative"
-    return entropy
+            return "Utils.__entropy: numbers in partitions must be non-negative"
+    return __entropy
 
 
 '''
@@ -92,9 +92,9 @@ def profit(data, index, values, classes):
         '''
 
         # Return information gain
-        return (entropy(proportions_of_data) -
-                less/len(data) * entropy(proportions_of_less) -
-                (len(data) - less)/len(data) * entropy(proportions_of_greater))
+        return (__entropy(proportions_of_data) -
+                less/len(data) * __entropy(proportions_of_less) -
+                (len(data) - less)/len(data) * __entropy(proportions_of_greater))
 
     # In the elif case, we are dealing with discrete attributes.
     elif len(values) > 1:
@@ -128,7 +128,7 @@ def profit(data, index, values, classes):
                     list_of_proportions[value][c] /= instances_per_value[value]
 
         # return the information gain
-        profit = entropy(proportions_of_data)
+        profit = __entropy(proportions_of_data)
 
         # For debugging
         '''
@@ -143,15 +143,15 @@ def profit(data, index, values, classes):
 
         for value in values:
             profit -= (instances_per_value[value]/len(data) *
-                       entropy(list_of_proportions[value]))
+                       __entropy(list_of_proportions[value]))
         return profit
     else:
         return "Utils.profit: values must be non-empty"
 
 
 if __name__ == '__main__':
-    assert entropy({1: 0.5, 2: 0.5}) == 1
-    assert entropy({1: 1.0, 2: 0.0}) == 0
+    assert __entropy({1: 0.5, 2: 0.5}) == 1
+    assert __entropy({1: 1.0, 2: 0.0}) == 0
     data1 = [
         [1, 1, 1, 0],
         [2, 1, 1, 1],
