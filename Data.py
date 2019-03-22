@@ -23,6 +23,9 @@ class Data:
             self.class_distribution = {
                 'Iris-setosa': 1/3, 'Iris-versicolor': 1/3,
                 'Iris-virginica': 1/3}
+            self.global_class_distribution = {
+                'Iris-setosa': 1/3, 'Iris-versicolor': 1/3,
+                'Iris-virginica': 1/3}
             if parse_dataset_files:
                 self.dataset = Parser.parse_data("iris/iris.data", 4)
             else:
@@ -40,6 +43,11 @@ class Data:
             self.amount_classes = 7
             self.classes = [0, 1, 2, 3, 4, 5, 6]
             self.class_distribution = {
+                0: 211840/581012, 1: 283301/581012, 2: 35754/581012,
+                3: 2747/581012, 4: 9493/581012, 5: 17367/581012,
+                6: 20510/581012
+            }
+            self.global_class_distribution = {
                 0: 211840/581012, 1: 283301/581012, 2: 35754/581012,
                 3: 2747/581012, 4: 9493/581012, 5: 17367/581012,
                 6: 20510/581012
@@ -95,4 +103,4 @@ class Data:
                 instance_number = len(projections_dict[value].dataset)
                 projections_dict[
                     value].class_distribution[c] /= instance_number
-        return list(projections_dict.values)
+        return projections_dict

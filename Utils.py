@@ -4,6 +4,7 @@ Module with utility functions used in more than one module.
 
 import Data
 import math
+import random
 
 
 '''
@@ -149,6 +150,15 @@ def profit(data, index, values, classes):
         return "Utils.profit: values must be non-empty"
 
 
+def weighted_random(values, distribution):
+    rand_num = random.random()
+    cumulative_distribution = 0
+    for i in range(len(distribution)):
+        cumulative_distribution += distribution[i]
+        if rand_num < cumulative_distribution:
+            return values[i]
+        
+
 if __name__ == '__main__':
     assert __entropy({1: 0.5, 2: 0.5}) == 1
     assert __entropy({1: 1.0, 2: 0.0}) == 0
@@ -181,3 +191,7 @@ if __name__ == '__main__':
     values2 = [1, 2, 3, 4]
     classes2 = [0, 1, 2, 3, 4, 5]
     assert profit(data2, index2, values2, classes2) + math.log2(1/3) < 0.00001
+
+    print(weighted_random([1,2,3], [0.1,0.8,0.1]))
+    print(weighted_random([1,2,3], [0.1,0.8,0.1]))
+    print(weighted_random([1,2,3], [0.1,0.8,0.1]))
