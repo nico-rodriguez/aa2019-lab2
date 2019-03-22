@@ -27,7 +27,7 @@ class Data:
                 'Iris-setosa': 1/3, 'Iris-versicolor': 1/3,
                 'Iris-virginica': 1/3}
             if parse_dataset_files:
-                self.dataset = Parser.parse_data("iris/iris.data", 4)
+                self.dataset = Parser.parse_data("iris/iris.data", 4, self.classes)
             else:
                 self.dataset = []
         else:
@@ -53,7 +53,8 @@ class Data:
                 6: 20510/581012
             }
             if parse_dataset_files:
-                self.dataset = Parser.parse_data("covtype/covtype.data", 7)
+                self.dataset = Parser.parse_data("covtype/covtype.data", 10, self.classes)
+                self.dataset = Parser.process_binary(self.dataset)
             else:
                 self.dataset = []
 
