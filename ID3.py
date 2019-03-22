@@ -25,26 +25,24 @@ def __dictionary_to_tree(dictionary):
     if dictionary != {}:
         tree = Tree()
         root = list(dictionary.keys())[0]
+        print('root', root)
         if 'data' in list(dictionary[root].keys()):
             tree.create_node(root, root, data=dictionary[root]['data'])
         else:
             tree.create_node(root, root)
-        for value in dictionary[root]["children"]:
-            '''
-            if (isinstance(value, dict)):
-                tree.paste(root, __dictionary_to_tree(value))
-            else:
-                tree.create_node(value, value, parent=root)
-            '''
+        for children_dict in dictionary[root]["children"]:
+            children_name = list(children_dict.keys())[0]
+            children_key_list = list(children_dict[children_name].keys())
             # Node is a leaf
-            if 'children' not in list(value[list(value.keys())[0]].keys()):
-                if 'data' in list(value[list(value.keys())[0]].keys()):
-                    tree.create_node(list(value.keys())[0], list(value.keys())[0], parent=root, data=value[list(value.keys())[0]]['data'])
+            if 'children' not in children_key_list:
+                if 'data' in children_key_list:
+                    tree.create_node(children_name, children_name, parent=root,
+                                     data=children_dict[children_name]['data'])
                 else:
-                    tree.create_node(list(value.keys())[0], list(value.keys())[0], parent=root)
+                    tree.create_node(children_name, children_name, parent=root)
             # Node is not leaf
             else:
-                tree.paste(root, __dictionary_to_tree(value))
+                tree.paste(root, __dictionary_to_tree(children_dict))
         return tree
     else:
         return Tree()
