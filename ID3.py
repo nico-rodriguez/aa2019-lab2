@@ -9,6 +9,12 @@ current decision, if the node is not a leaf; if the node is a leaf, the tag
 is the class label.
 The identifiers of the nodes are the values of the attribute labeled in the
 parent node (None for root).
+Example:
+                                    (tag=a3, id=None)
+                                   /                 \
+                    (tag=a1, id = v31)          (tag=a2, id=v32)
+                    /                \                  |
+            (tag=c2, id v11)    (tag=c1, id=v12)    (tag=c3, id=v21)
 '''
 import json
 from treelib import Tree
