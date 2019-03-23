@@ -15,6 +15,7 @@ def parse_data(file_route, amount_attributes, classes):
     with open(file_route, "r") as file_to_parse:
         lines_of_data = file_to_parse.readlines()
     lines_of_split_data = []
+    print("File data loaded succesfully")
     for line in lines_of_data:
         split_line = line.split(",")
         if ("iris" not in file_route):
@@ -26,7 +27,8 @@ def parse_data(file_route, amount_attributes, classes):
     lines_of_split_data = lines_of_split_data[0:len(lines_of_split_data)-1]
     for atribute in range(0, amount_attributes):
         class_id = lines_of_split_data[0][amount_attributes]
-        for split_line in lines_of_split_data:
+        for idx, split_line in enumerate(lines_of_split_data, start=0):
+            print("parsing atribute " + str(atribute) + " in line " + str(idx))
             if (class_id != split_line[amount_attributes]):
                 breakpoint_profit = Utils.profit(lines_of_split_data, atribute, [split_line[atribute]], classes)
                 profits.append((breakpoint_profit, split_line[atribute]))
@@ -56,7 +58,7 @@ def process_binary(lines_of_split_data):
 
 
 if __name__ == "__main__":
-    data = Data.Data("iris")
-    with open("processed_data_iris.txt", "w") as outfile:
+    data = Data.Data("not_iris")
+    with open("processed_data_covtype.txt", "w") as outfile:
         for line in data.dataset:
             outfile.write(str(line) + "\n")
