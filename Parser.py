@@ -30,7 +30,9 @@ def parse_data(file_route, amount_attributes, classes):
         for idx, split_line in enumerate(lines_of_split_data, start=0):
             print("parsing atribute " + str(atribute) + " in line " + str(idx))
             if (class_id != split_line[amount_attributes]):
-                breakpoint_profit = Utils.profit(lines_of_split_data, atribute, [split_line[atribute]], classes)
+                breakpoint_profit = Utils.profit(
+                    lines_of_split_data, atribute, [split_line[atribute]],
+                    classes)
                 profits.append((breakpoint_profit, split_line[atribute]))
                 class_id = split_line[amount_attributes]
         ideal_breakpoint = max(profits)
@@ -54,7 +56,6 @@ def process_binary(lines_of_split_data):
         copied_list.append(line[-1])
         result_list.append(copied_list)
     return result_list
-
 
 
 if __name__ == "__main__":
