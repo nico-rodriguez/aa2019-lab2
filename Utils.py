@@ -2,7 +2,6 @@
 Module with utility functions used in more than one module.
 '''
 
-import Data
 import math
 import random
 
@@ -21,7 +20,8 @@ def __entropy(partitions):
         if partitions[key] > 0:
             __entropy -= partitions[key]*math.log2(partitions[key])
         elif partitions[key] < 0:
-            return "Utils.__entropy: numbers in partitions must be non-negative"
+            return(
+                "Utils.__entropy: numbers in partitions must be non-negative")
     return __entropy
 
 
@@ -95,7 +95,8 @@ def profit(data, index, values, classes):
         # Return information gain
         return (__entropy(proportions_of_data) -
                 less/len(data) * __entropy(proportions_of_less) -
-                (len(data) - less)/len(data) * __entropy(proportions_of_greater))
+                (len(data) - less)/len(data) *
+                __entropy(proportions_of_greater))
 
     # In the elif case, we are dealing with discrete attributes.
     elif len(values) > 1:
@@ -157,7 +158,7 @@ def weighted_random(values, distribution):
         cumulative_distribution += distribution[i]
         if rand_num < cumulative_distribution:
             return values[i]
-        
+
 
 if __name__ == '__main__':
     assert __entropy({1: 0.5, 2: 0.5}) == 1
@@ -192,6 +193,6 @@ if __name__ == '__main__':
     classes2 = [0, 1, 2, 3, 4, 5]
     assert profit(data2, index2, values2, classes2) + math.log2(1/3) < 0.00001
 
-    print(weighted_random([1,2,3], [0.1,0.8,0.1]))
-    print(weighted_random([1,2,3], [0.1,0.8,0.1]))
-    print(weighted_random([1,2,3], [0.1,0.8,0.1]))
+    print(weighted_random([1, 2, 3], [0.1, 0.8, 0.1]))
+    print(weighted_random([1, 2, 3], [0.1, 0.8, 0.1]))
+    print(weighted_random([1, 2, 3], [0.1, 0.8, 0.1]))
