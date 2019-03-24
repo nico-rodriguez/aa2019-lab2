@@ -20,6 +20,7 @@ import json
 from treelib import Tree
 from Utils import profit, weighted_random
 import random
+import Data
 
 
 # Saves the tree in treelib format into target_file in json format
