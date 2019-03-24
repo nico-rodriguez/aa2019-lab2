@@ -5,10 +5,22 @@ This module's responsibility is to encapsule the parsed data as well as
 metadata from the given dataset.
 '''
 import Parser
+import ast
 
 
 class Data:
-    def __init__(self, data_name, parse_dataset_files=True):
+    '''
+    data_name may be 'iris' or 'covtype'.
+    parse_dataset_file may be True or False. In the first case, the .data files
+    are parsed and converted to Python objects; in the second case, those files
+    are not parsed, but the instance_file with the preprocessed instances is
+    read instead. The preprocessed instances where converted to Python objects
+    with the corresponding types (list, str, int, float, etc...) and the
+    numeric attributes where split in two ranges: 0 for those below or equal
+    to some cutting point, and 1 for the rest.
+    '''
+    def __init__(
+            self, data_name, parse_dataset_files=True, instances_file=None):
         self.data_name = data_name
         # Indicates if all instances belong to the same class
         self.monoclass_instances = None
@@ -30,7 +42,14 @@ class Data:
                 self.dataset = Parser.parse_data(
                     "iris/iris.data", 4, self.classes)
             else:
-                self.dataset = []
+                if instances_file is None:
+                    self.dataset = []
+                else:
+                    with open(instances_file, 'r') as processed_data:
+                        instances_list = processed_data.readlines()
+                        self.dataset = []
+                        for line in instances_list:
+                            self.dataset.append(ast.literal_eval(line))
         else:
             # TODO: check number of attributes of dataset (dataset info states
             # that there are 12 attributes, divided into 54 columns)
@@ -39,7 +58,7 @@ class Data:
             self.attribute_values = {
                 0: [0, 1], 1: [0, 1], 2: [0, 1], 3: [0, 1], 4: [0, 1],
                 5: [0, 1], 6: [0, 1], 7: [0, 1], 8: [0, 1], 9: [0, 1],
-                10: [0, 1], 11: [0, 1]
+                10: [0, 1, 2, 3], 11: list(range(40))
             }
             self.amount_classes = 7
             self.classes = [0, 1, 2, 3, 4, 5, 6]
@@ -58,7 +77,14 @@ class Data:
                     "covtype/covtype.data", 10, self.classes)
                 self.dataset = Parser.process_binary(self.dataset)
             else:
-                self.dataset = []
+                if instances_file is None:
+                    self.dataset = []
+                else:
+                    with open(instances_file, 'r') as processed_data:
+                        instances_list = processed_data.readlines()
+                        self.dataset = []
+                        for line in instances_list:
+                            self.dataset.append(ast.literal_eval(line))
 
     '''
     Project the instances across attribute, returning a list with instances of
@@ -102,8 +128,32 @@ class Data:
 
         # Adjust the class distributions dividing by the number of instances
         for value in projections_dict:
-            for c in projections_dict[value].class_distribution:
-                instance_number = len(projections_dict[value].dataset)
-                projections_dict[
-                    value].class_distribution[c] /= instance_number
+            # Indicates if all instances belong to the same class
+            monoclass_instances = True
+            # Class label of the last instance viewed
+            last_class_instance = None
+
+            projected_data = projections_dict[value]
+            for c in projected_data.class_distribution:
+                instance_number = len(projected_data.dataset)
+                projected_data.class_distribution[c] /= instance_number
+
+                # Check if filtered instances belong to the same class
+                if projected_data.class_distribution[c] > 0:
+                    if last_class_instance is None:
+                        last_class_instance = c
+                    else:
+                        if last_class_instance != c:
+                            monoclass_instances = False
+
+            # Set monoclass_instances attribute
+            if monoclass_instances and last_class_instance is not None:
+                projected_data.monoclass_instances = last_class_instance
+
         return projections_dict
+
+
+if __name__ == '__main__':
+    data = Data('iris', False, 'processed_data_iris.txt')
+    print(data.dataset)
+    data2 = Data('covtype', False, 'processed_data_covtype.txt')
