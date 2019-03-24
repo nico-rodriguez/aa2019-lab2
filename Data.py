@@ -4,8 +4,11 @@ Data module
 This module's responsibility is to encapsule the parsed data as well as
 metadata from the given dataset.
 '''
-import Parser
 import ast
+
+
+iris_processed_data = 'processed_data_iris.txt'
+covtype_processed_data = 'processed_data_covtype.txt'
 
 
 class Data:
@@ -19,12 +22,13 @@ class Data:
     numeric attributes where split in two ranges: 0 for those below or equal
     to some cutting point, and 1 for the rest.
     '''
-    def __init__(
-            self, data_name, parse_dataset_files=True, instances_file=None):
+    def __init__(self, data_name):
+        print('Creating Data class instance')
         self.data_name = data_name
         # Indicates if all instances belong to the same class
         self.monoclass_instances = None
         if (data_name == "iris"):
+            print('Iris data selected')
             self.amount_attributes = 4
             self.attributes = [0, 1, 2, 3]
             self.attribute_values = {
@@ -38,19 +42,16 @@ class Data:
             self.global_class_distribution = {
                 'Iris-setosa': 1/3, 'Iris-versicolor': 1/3,
                 'Iris-virginica': 1/3}
-            if parse_dataset_files:
-                self.dataset = Parser.parse_data(
-                    "iris/iris.data", 4, self.classes)
-            else:
-                if instances_file is None:
-                    self.dataset = []
-                else:
-                    with open(instances_file, 'r') as processed_data:
-                        instances_list = processed_data.readlines()
-                        self.dataset = []
-                        for line in instances_list:
-                            self.dataset.append(ast.literal_eval(line))
+            print('Beginning iris data loading into Data instance')
+            with open(iris_processed_data, 'r') as instance_file:
+                instances_list = instance_file.readlines()
+                self.dataset = []
+                for line in instances_list:
+                    # Convert the list in the string to a list
+                    instance_as_list = ast.literal_eval(line)
+                    self.dataset.append(instance_as_list)
         else:
+            print('Covtype data selected')
             self.amount_attributes = 12
             self.attributes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
             self.attribute_values = {
@@ -70,19 +71,33 @@ class Data:
                 3: 2747/581012, 4: 9493/581012, 5: 17367/581012,
                 6: 20510/581012
             }
-            if parse_dataset_files:
-                self.dataset = Parser.parse_data(
-                    "covtype/covtype.data", 10, self.classes)
-                self.dataset = Parser.process_binary(self.dataset)
+            print('Beginning covtype data loading into Data instance')
+            with open(covtype_processed_data, 'r') as instance_file:
+                instances_list = instance_file.readlines()
+                self.dataset = []
+                for line in instances_list:
+                    # Convert the list in the string to a list
+                    instance_as_list = ast.literal_eval(line)
+                    self.dataset.append(instance_as_list)
+
+    '''
+    Returns true iff the possible attribute values are 0 or 1.
+    '''
+    def splitable_attribute(self, attribute):
+        return len(self.attribute_values[attribute]) == 2
+
+    '''
+    Split the attribute by using the cutting value provided.
+    The instances with attribute value less than or equal to the cutting point
+    will have a new attribute value of 0; the rest of them will have 1 as the
+    attribute value.
+    '''
+    def split_attribute(self, attribute, cutting_value):
+        for instance in self.dataset:
+            if instance[attribute] <= cutting_value:
+                instance[attribute] = 0
             else:
-                if instances_file is None:
-                    self.dataset = []
-                else:
-                    with open(instances_file, 'r') as processed_data:
-                        instances_list = processed_data.readlines()
-                        self.dataset = []
-                        for line in instances_list:
-                            self.dataset.append(ast.literal_eval(line))
+                instance[attribute] = 1
 
     '''
     Project the instances across attribute, returning a list with instances of
@@ -152,6 +167,23 @@ class Data:
 
 
 if __name__ == '__main__':
-    data = Data('iris', False, 'processed_data_iris.txt')
-    print(data.dataset)
-    data2 = Data('covtype', False, 'processed_data_covtype.txt')
+
+    data = Data('iris')
+    print(data.dataset[0:20])
+
+    data2 = Data('covtype')
+    print(data2.dataset[0:20])
+
+    test = '["1", "2.0", "Some word"]'
+    test = ast.literal_eval(test)
+    print(test)
+    test2 = []
+    for elem in test:
+        if elem.isdigit() or '.' in elem:
+            test2.append(ast.literal_eval(elem))
+            print(ast.literal_eval(elem))
+        else:
+            test2.append(elem)
+            print(elem)
+    print(test2)
+    print(ast.literal_eval('1.0'))
