@@ -51,8 +51,6 @@ class Data:
                         for line in instances_list:
                             self.dataset.append(ast.literal_eval(line))
         else:
-            # TODO: check number of attributes of dataset (dataset info states
-            # that there are 12 attributes, divided into 54 columns)
             self.amount_attributes = 12
             self.attributes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
             self.attribute_values = {
