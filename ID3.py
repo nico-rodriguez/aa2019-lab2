@@ -111,7 +111,7 @@ def __ID3(data, parent_attribute_value):
         else:
             # Use data.class_distribution to label
             sorted_class = weighted_random(data.classes,
-                                           data.class_distribution)
+                                           list(data.class_distribution.values()))
             tree.create_node('Class {c}'.format(c=sorted_class),
                              parent_attribute_value)
             return tree
@@ -120,10 +120,17 @@ def __ID3(data, parent_attribute_value):
         # Choose best attribute
         best_root_attribute_list = []
         best_profit = None
+        spliting_value_for_attribute = {}
         for attribute in data.attributes:
-            new_profit = profit(data.dataset, attribute,
-                                data.attribute_values[attribute],
-                                data.classes)
+            if data.splitable_attribute(attribute):
+                spliting_value_for_attribute[attribute] = (
+                    data.best_cutting_value(attribute))
+                new_profit = profit(data.dataset, attribute,
+                                    [spliting_value_for_attribute[attribute]],
+                                    data.classes)
+            else:
+                new_profit = profit(data.dataset, attribute,
+                                    data.attribute_values, data.classes)
             # If more than one attributes have equal profit,
             # choose one at random
             if (best_profit is None) or (new_profit > best_profit):
@@ -136,6 +143,10 @@ def __ID3(data, parent_attribute_value):
         # Create root node for this case
         tree.create_node('Attribute (attribute)'.format(
             attribute=best_root_attribute), parent_attribute_value)
+        if data.splitable_attribute(best_root_attribute):
+            data.split_attribute(best_root_attribute,
+                                 spliting_value_for_attribute[
+                                    best_root_attribute])
         # Generate a branch for each possible value of the attribute
         filtered_data_dict = data.project_attribute(best_root_attribute)
         for value in data.attribute_values[best_root_attribute]:
@@ -177,3 +188,6 @@ if __name__ == "__main__":
     save_tree(tree_test, "test2.json")
     print(tree_test.leaves())
     assert tree_test.get_node('Mark').is_leaf()
+
+    data = Data.Data('iris')
+    ID3(data)
