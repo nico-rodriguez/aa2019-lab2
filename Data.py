@@ -5,6 +5,8 @@ This module's responsibility is to encapsule the parsed data as well as
 metadata from the given dataset.
 '''
 import ast
+import random
+import Utils
 
 
 iris_processed_data = 'processed_data_iris.txt'
@@ -98,7 +100,37 @@ class Data:
                 instance[attribute] = 0
             else:
                 instance[attribute] = 1
+        return self
 
+    '''
+    Find the best cutting value for an attribute from a random choice of 10
+    possible values from the dataset.
+
+    *** PRECONDITION ***: the attribute must be splitable
+    '''
+    def best_cutting_value(self, attribute):
+        best_cutting_value = None
+        best_profit = None
+        random_indices = random.sample(
+            list(range(len(self.dataset))), 10)
+
+        for i in random_indices:
+            new_profit = Utils.profit(
+                self.dataset, attribute, [self.dataset[i][attribute]],
+                self.classes)
+            if best_profit is None or new_profit > best_profit:
+                best_profit = new_profit
+                best_cutting_value = self.dataset[i][attribute]
+        '''
+        for instance in self.dataset:
+            new_profit = Utils.profit(
+                self.dataset, attribute, [instance[attribute]], self.classes)
+            if best_profit is None or new_profit > best_profit:
+                best_profit = new_profit
+                best_cutting_value = instance[attribute]
+        '''
+
+        return best_cutting_value
     '''
     Project the instances across attribute, returning a list with instances of
     Data that doesn't share memory with the current instance.
@@ -110,10 +142,11 @@ class Data:
         projections_dict = {}
         for value in self.attribute_values[attribute]:
             # Don't parse files for the new Data instances
-            projected_data = Data(self.data_name, False)
-            # Adjust remaining attributes
+            projected_data = Data(self.data_name)
+            # Adjust remaining attributes and amount of them
             projected_data.attributes = self.attributes.copy()
             projected_data.attributes.remove(attribute)
+            projected_data.amount_attributes = self.amount_attributes - 1
             # Adjust dictionary of attribute -> values
             projected_data.attribute_values = self.attribute_values.copy()
             del projected_data.attribute_values[attribute]
@@ -121,6 +154,7 @@ class Data:
             for i in range(len(projected_data.class_distribution)):
                 projected_data.class_distribution[i] = 0.0
 
+            projected_data.dataset = []
             # Add projected data to dictionary. It remains to filter the
             # instances and compute the class distributions for each new
             # instance of Data.
@@ -171,19 +205,15 @@ if __name__ == '__main__':
     data = Data('iris')
     print(data.dataset[0:20])
 
+    split_data = data.split_attribute(
+        0, data.best_cutting_value(0)).project_attribute(0)
+    with open('test.txt', 'w') as test_file:
+        for instance in split_data[0].dataset:
+            test_file.write(str(instance) + '\n')
+        test_file.write('\n\n')
+        for instance in split_data[1].dataset:
+            test_file.write(str(instance) + '\n')
+    '''
     data2 = Data('covtype')
     print(data2.dataset[0:20])
-
-    test = '["1", "2.0", "Some word"]'
-    test = ast.literal_eval(test)
-    print(test)
-    test2 = []
-    for elem in test:
-        if elem.isdigit() or '.' in elem:
-            test2.append(ast.literal_eval(elem))
-            print(ast.literal_eval(elem))
-        else:
-            test2.append(elem)
-            print(elem)
-    print(test2)
-    print(ast.literal_eval('1.0'))
+    '''
