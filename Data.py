@@ -111,8 +111,11 @@ class Data:
     def best_cutting_value(self, attribute):
         best_cutting_value = None
         best_profit = None
-        random_indices = random.sample(
-            list(range(len(self.dataset))), 10)
+        if len(self.dataset) > 10:
+            random_indices = random.sample(
+                list(range(len(self.dataset))), 10)
+        else:
+            random_indices = list(range(len(self.dataset)))
 
         for i in random_indices:
             new_profit = Utils.profit(
@@ -183,7 +186,8 @@ class Data:
             projected_data = projections_dict[value]
             for c in projected_data.class_distribution:
                 instance_number = len(projected_data.dataset)
-                projected_data.class_distribution[c] /= instance_number
+                if instance_number > 0:
+                    projected_data.class_distribution[c] /= instance_number
 
                 # Check if filtered instances belong to the same class
                 if projected_data.class_distribution[c] > 0:
