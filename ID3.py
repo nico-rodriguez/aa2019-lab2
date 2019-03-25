@@ -75,7 +75,7 @@ returns a classification tree following ID3 algorithm.
 
 
 def ID3(data):
-    return __ID3(data, None)
+    return __ID3(data, None, None)
 
 
 '''
@@ -88,13 +88,14 @@ Returns a decision tree of treelib type.
 '''
 
 
-def __ID3(data, parent_attribute_value):
+def __ID3(data, parent_attribute, parent_attribute_value):
     # Ćreate a root
     tree = Tree()
     # All remaining instances belong to the same class
     if data.monoclass_instances is not None:
         tree.create_node('Class {c}'.format(c=data.monoclass_instances),
-                         parent_attribute_value)
+                         'Attribute {attr} = {val}'.format(
+                            attr=parent_attribute, val=parent_attribute_value))
         return tree
     # The are no attributes left
     if data.amount_attributes == 0:
@@ -104,7 +105,8 @@ def __ID3(data, parent_attribute_value):
             sorted_class = weighted_random(data.classes,
                                            data.global_class_distribution)
             tree.create_node('Class {c}'.format(c=sorted_class),
-                             parent_attribute_value)
+                             'Attribute {attr} = {val}'.format(
+                            attr=parent_attribute, val=parent_attribute_value))
             return tree
         # If there are examples left, sort the label according to the
         # class distribution known by the parent node
@@ -113,16 +115,18 @@ def __ID3(data, parent_attribute_value):
             sorted_class = weighted_random(
                 data.classes, list(data.class_distribution.values()))
             tree.create_node('Class {c}'.format(c=sorted_class),
-                             parent_attribute_value)
+                             'Attribute {attr} = {val}'.format(
+                            attr=parent_attribute, val=parent_attribute_value))
             return tree
     # There are attributes left
     elif data.amount_attributes > 0:
         if len(data.dataset) == 0:
             # Any label is likely (check data.global_class_distribution)
-            sorted_class = weighted_random(data.classes,
-                                           data.global_class_distribution)
+            sorted_class = weighted_random(
+                data.classes, list(data.global_class_distribution.values()))
             tree.create_node('Class {c}'.format(c=sorted_class),
-                             parent_attribute_value)
+                             'Attribute {attr} = {val}'.format(
+                            attr=parent_attribute, val=parent_attribute_value))
             return tree
         else:
             # Choose best attribute
@@ -134,7 +138,8 @@ def __ID3(data, parent_attribute_value):
                     spliting_value_for_attribute[attribute] = (
                         data.best_cutting_value(attribute))
                     new_profit = profit(data.dataset, attribute,
-                                        [spliting_value_for_attribute[attribute]],
+                                        [spliting_value_for_attribute[
+                                            attribute]],
                                         data.classes)
                 else:
                     new_profit = profit(data.dataset, attribute,
@@ -149,8 +154,10 @@ def __ID3(data, parent_attribute_value):
 
             best_root_attribute = random.choice(best_root_attribute_list)
             # Create root node for this case
-            tree.create_node('Attribute (attribute)'.format(
-                attribute=best_root_attribute), parent_attribute_value)
+            tree.create_node('Attribute {attr}'.format(
+                attr=best_root_attribute),
+                'Attribute {attr} = {val}'.format(
+                            attr=parent_attribute, val=parent_attribute_value))
             if data.splitable_attribute(best_root_attribute):
                 data.split_attribute(best_root_attribute,
                                      spliting_value_for_attribute[
@@ -158,20 +165,27 @@ def __ID3(data, parent_attribute_value):
             # Generate a branch for each possible value of the attribute
             filtered_data_dict = data.project_attribute(best_root_attribute)
             for value in data.attribute_values[best_root_attribute]:
-                # If there are no examples left, sort the label according to the
-                # class distribution known by the parent node
+                # If there are no examples left, sort the label according to
+                # the class distribution known by the parent node
                 if len(filtered_data_dict[value].dataset) == 0:
                     # Use filtered_data_dict[value].class_distribution to label
                     sorted_class = weighted_random(
                         filtered_data_dict[value].classes,
-                        filtered_data_dict[value].class_distribution)
-                    tree.create_node('Class {c}'.format(c=sorted_class), value)
+                        list(filtered_data_dict[
+                            value].class_distribution.values()))
+                    tree.create_node('Class {c}'.format(c=sorted_class),
+                                     'Attribute {attr} = {val}'.format(
+                            attr=best_root_attribute, val=value))
                     return tree
                 # Recursive call
                 elif len(filtered_data_dict[value].dataset) > 0:
-                    child = __ID3(filtered_data_dict[value], value)
+                    child = __ID3(filtered_data_dict[value],
+                                  best_root_attribute, value)
                     # Attach child to parent
-                    tree.paste(parent_attribute_value, child)
+                    print(tree)
+                    tree.paste('Attribute {attr} = {val}'.format(
+                            attr=parent_attribute, val=parent_attribute_value),
+                        child)
         return tree
     # Exception
     else:
