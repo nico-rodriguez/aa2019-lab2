@@ -26,7 +26,6 @@ import Data
 # Saves the tree in treelib format into target_file in json format
 def save_tree(tree, target_file):
     json_str = tree.to_json(with_data=True)
-    print(json_str)
     # Process json_str to a propper json format for load_tree
     json_str = json_str.replace("\\", "")
     with open(target_file, 'w') as outfile:
@@ -38,7 +37,6 @@ def __dictionary_to_tree(dictionary):
     if dictionary != {}:
         tree = Tree()
         root = list(dictionary.keys())[0]
-        print('root', root)
         if 'data' in list(dictionary[root].keys()):
             tree.create_node(root, root, data=dictionary[root]['data'])
         else:
@@ -91,8 +89,6 @@ Returns a decision tree of treelib type.
 
 def __ID3(tree, data, parent_attribute, parent_attribute_value,
           path_to_parent):
-    tree.show(idhidden=False)
-    print(path_to_parent)
     parent_id = path_to_parent
     if path_to_parent is None:
         path_to_parent = ""
@@ -207,6 +203,7 @@ def __ID3(tree, data, parent_attribute, parent_attribute_value,
 
 
 if __name__ == "__main__":
+    '''
     data = Data.Data('iris')
     tree = ID3(data)
     tree.show(idhidden=False)
@@ -214,4 +211,3 @@ if __name__ == "__main__":
     data2 = Data.Data('covtype')
     tree2 = ID3(data2)
     tree2.show(idhidden=False)
-    '''
