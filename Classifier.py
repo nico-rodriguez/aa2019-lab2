@@ -97,7 +97,7 @@ def classify_dataset(data):
         other_classes_label = "NO"+clss_label
         new_data.classes = [clss_label, other_classes_label]
         distr = 0.0
-        for key in data.class_distribution.keys()
+        for key in data.class_distribution.keys():
             if key != clss_label:
                 distr += new_data.class_distribution[key]
         new_data.class_distribution = {clss_label: 1-distr, other_classes_label: distr}
@@ -115,7 +115,7 @@ def classify_dataset(data):
             count += 1
         
 
-# returns the id of which tag of the processed tags of 
+# returns the tag index of which tag of the
 # the tree wins (which one is chosen for the input)
 def process_tags(tags):
 
@@ -136,8 +136,8 @@ def process_tags(tags):
 
     filtered_tags = filter(filter_func,tags)
     mapped_tags = map(map_func, filtered_tags)
-    max_val = foldr max tags[0][2] mapped_tags
-    max_tags = filter((isEqual max_val), filtered_tags)
+    max_val = foldr (max) (tags[0][2]) (mapped_tags)
+    max_tags = filter((isEqual (max_val)), filtered_tags)
     return (random.sample(max_tags, 1))[0]
 
 
