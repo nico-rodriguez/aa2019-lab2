@@ -9,6 +9,7 @@ import ID3
 import Data
 import Evaluator
 import random
+import re
 
 
 # devides data.dataset into two data sets, the first which is
@@ -40,13 +41,43 @@ def k_fold_cross_validation(data, k):
     return result_list
 
 
+# creates both validation and training sets from data
+def divide_corpus(data, percetnage_training):
+    validation_set = data.dataset.copy()
+    training_set = []
+    partition_length = round(len(data.dataset) * percetnage_training)
+    for i in partition_length:
+        data_index = random.randint(0, len(validation_set))
+        training_set.append(validation_set[data_index])
+        # data thats on training set cant be on validation set
+        del validation_set[data_index]  
+    return (training_set, validation_set)
+
+
+# returns the class of the instance according to tree
+def classify(tree, instance):
+    # first node is fetched by hand
+    current_path = "Attribute None = None"
+    current_node = tree.get_node(current_path)
+    # while we havent hit a leave
+    while "Class" not in current_node.tag:
+        # node tags are in the form "attribute x" where x is its id which is fecthed
+        # a simple regex
+        current_attribute = int(re.findall(r'\d+', current_node.tag)[0])
+        attribute_value = instance[current_attribute]
+        # continue to move inside tree with the transition
+        target_id = (current_path + ",Attribute " + str(current_attribute) +
+                     " = " + str(attribute_value) + ",")
+        current_node.get_node(target_id)
+    return current_node.tag
+
+
 if __name__ == "__main__":
     data = Data.Data('iris')
-    k_fold_data = k_fold_cross_validation(data, 5)
-    iris_trees = []
-    iris_results = []
-    for partition in k_fold_data:
-        iris_trees.append(ID3(Data.Data(partition[0])))
-    for i in range(0, len(iris_trees)):
-        iris_results.append(Evaluator.evaluate_iris(
-            k_fold_data[i][1], iris_trees))
+    divided_corpus = divide_corpus(data, 0.80)
+    iris_tree = ID3(divided_corpus[0])
+    list_of_classified_instances = []
+    for instance in divided_corpus[1]:
+        list_of_classified_instances.append((
+            classify(iris_tree, instance), instance))
+    print(list_of_classified_instances)
