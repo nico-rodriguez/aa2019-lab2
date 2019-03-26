@@ -91,7 +91,7 @@ Returns a decision tree of treelib type.
 
 def __ID3(tree, data, parent_attribute, parent_attribute_value, path_to_parent):
     parent_id = path_to_parent
-    if path_to_parent is None:
+    if path_to_parent is None: 
         path_to_parent = ""
     # All remaining instances belong to the same class
     if data.monoclass_instances is not None:
@@ -189,12 +189,11 @@ def __ID3(tree, data, parent_attribute, parent_attribute_value, path_to_parent):
                 # Recursive call
                 elif len(filtered_data_dict[value].dataset) > 0:
                     print(tree)
-                    child = __ID3(tree, filtered_data_dict[value],
-                                  best_root_attribute, value, path_to_parent +
-                                  "Attribute {attr} = {val}".format(
-                                  attr=best_root_attribute, val=value) + ",")
-                    # Attach child to parent
-                    tree.paste(parent_id, child)
+                    __ID3(tree, filtered_data_dict[value],
+                          best_root_attribute, value, path_to_parent +
+                          "Attribute {attr} = {val}".format(
+                          attr=parent_attribute,
+                          val=parent_attribute_value) + ",")
                     print(tree)
         return tree
     # Exception
