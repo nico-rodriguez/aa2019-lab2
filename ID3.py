@@ -149,7 +149,8 @@ def __ID3(tree, data, parent_attribute, parent_attribute_value, path_to_parent):
                                         data.classes)
                 else:
                     new_profit = profit(data.dataset, attribute,
-                                        data.attribute_values, data.classes)
+                                        data.attribute_values[attribute],
+                                        data.classes)
                 # If more than one attributes have equal profit,
                 # choose one at random
                 if (best_profit is None) or (new_profit > best_profit):
@@ -188,13 +189,11 @@ def __ID3(tree, data, parent_attribute, parent_attribute_value, path_to_parent):
                     return tree
                 # Recursive call
                 elif len(filtered_data_dict[value].dataset) > 0:
-                    print(tree)
                     __ID3(tree, filtered_data_dict[value],
                           best_root_attribute, value, path_to_parent +
                           "Attribute {attr} = {val}".format(
                           attr=parent_attribute,
                           val=parent_attribute_value) + ",")
-                    print(tree)
         return tree
     # Exception
     else:
@@ -203,4 +202,9 @@ def __ID3(tree, data, parent_attribute, parent_attribute_value, path_to_parent):
 
 if __name__ == "__main__":
     data = Data.Data('iris')
-    ID3(data)
+    tree = ID3(data)
+    # tree.show(idhidden=False)
+
+    data2 = Data.Data('covtype')
+    tree2 = ID3(data2)
+    tree2.show(idhidden=False)

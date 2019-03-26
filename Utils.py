@@ -4,6 +4,7 @@ Module with utility functions used in more than one module.
 
 import math
 import random
+import Data
 
 
 '''
@@ -161,8 +162,6 @@ def weighted_random(values, distribution):
 
 
 if __name__ == '__main__':
-    assert __entropy({1: 0.5, 2: 0.5}) == 1
-    assert __entropy({1: 1.0, 2: 0.0}) == 0
     data1 = [
         [1, 1, 1, 0],
         [2, 1, 1, 1],
@@ -193,6 +192,5 @@ if __name__ == '__main__':
     classes2 = [0, 1, 2, 3, 4, 5]
     assert profit(data2, index2, values2, classes2) + math.log2(1/3) < 0.00001
 
-    print(weighted_random([1, 2, 3], [0.1, 0.8, 0.1]))
-    print(weighted_random([1, 2, 3], [0.1, 0.8, 0.1]))
-    print(weighted_random([1, 2, 3], [0.1, 0.8, 0.1]))
+    data = Data.Data('covtype')
+    print(profit(data.dataset, 10, data.attribute_values[10], data.classes))
