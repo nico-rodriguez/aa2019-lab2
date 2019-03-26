@@ -75,7 +75,8 @@ returns a classification tree following ID3 algorithm.
 
 
 def ID3(data):
-    return __ID3(data, None, None)
+    tree = Tree()
+    return __ID3(tree, data, None, None, None)
 
 
 '''
@@ -88,14 +89,16 @@ Returns a decision tree of treelib type.
 '''
 
 
-def __ID3(data, parent_attribute, parent_attribute_value):
-    # Ćreate a root
-    tree = Tree()
+def __ID3(tree, data, parent_attribute, parent_attribute_value, path_to_parent):
+    parent_id = path_to_parent
+    if path_to_parent is None:
+        path_to_parent = ""
     # All remaining instances belong to the same class
     if data.monoclass_instances is not None:
         tree.create_node('Class {c}'.format(c=data.monoclass_instances),
-                         'Attribute {attr} = {val}'.format(
-                            attr=parent_attribute, val=parent_attribute_value))
+                         path_to_parent + 'Attribute {attr} = {val}'.format(
+                         attr=parent_attribute, val=parent_attribute_value)
+                         + ",", parent_id)
         return tree
     # The are no attributes left
     if data.amount_attributes == 0:
@@ -105,8 +108,9 @@ def __ID3(data, parent_attribute, parent_attribute_value):
             sorted_class = weighted_random(data.classes,
                                            data.global_class_distribution)
             tree.create_node('Class {c}'.format(c=sorted_class),
-                             'Attribute {attr} = {val}'.format(
-                            attr=parent_attribute, val=parent_attribute_value))
+                             path_to_parent + 'Attribute {attr} = {val}'
+                             .format(attr=parent_attribute,
+                             val=parent_attribute_value) + ",", parent_id)
             return tree
         # If there are examples left, sort the label according to the
         # class distribution known by the parent node
@@ -115,8 +119,9 @@ def __ID3(data, parent_attribute, parent_attribute_value):
             sorted_class = weighted_random(
                 data.classes, list(data.class_distribution.values()))
             tree.create_node('Class {c}'.format(c=sorted_class),
-                             'Attribute {attr} = {val}'.format(
-                            attr=parent_attribute, val=parent_attribute_value))
+                             path_to_parent + 'Attribute {attr} = {val}'
+                             .format(attr=parent_attribute,
+                             val=parent_attribute_value) + ",", parent_id)
             return tree
     # There are attributes left
     elif data.amount_attributes > 0:
@@ -125,8 +130,9 @@ def __ID3(data, parent_attribute, parent_attribute_value):
             sorted_class = weighted_random(
                 data.classes, list(data.global_class_distribution.values()))
             tree.create_node('Class {c}'.format(c=sorted_class),
-                             'Attribute {attr} = {val}'.format(
-                            attr=parent_attribute, val=parent_attribute_value))
+                             path_to_parent + 'Attribute {attr} = {val}'
+                             .format(attr=parent_attribute,
+                             val=parent_attribute_value) + ",", parent_id)
             return tree
         else:
             # Choose best attribute
@@ -156,8 +162,9 @@ def __ID3(data, parent_attribute, parent_attribute_value):
             # Create root node for this case
             tree.create_node('Attribute {attr}'.format(
                 attr=best_root_attribute),
-                'Attribute {attr} = {val}'.format(
-                            attr=parent_attribute, val=parent_attribute_value))
+                path_to_parent + 'Attribute {attr} = {val}'.format(
+                attr=parent_attribute, val=parent_attribute_value) + ",",
+                parent_id)
             if data.splitable_attribute(best_root_attribute):
                 data.split_attribute(best_root_attribute,
                                      spliting_value_for_attribute[
@@ -174,18 +181,21 @@ def __ID3(data, parent_attribute, parent_attribute_value):
                         list(filtered_data_dict[
                             value].class_distribution.values()))
                     tree.create_node('Class {c}'.format(c=sorted_class),
+                                     path_to_parent +
                                      'Attribute {attr} = {val}'.format(
-                            attr=best_root_attribute, val=value))
+                                    attr=best_root_attribute, val=value) + ",",
+                                    parent_id)
                     return tree
                 # Recursive call
                 elif len(filtered_data_dict[value].dataset) > 0:
-                    child = __ID3(filtered_data_dict[value],
-                                  best_root_attribute, value)
-                    # Attach child to parent
                     print(tree)
-                    tree.paste('Attribute {attr} = {val}'.format(
-                            attr=parent_attribute, val=parent_attribute_value),
-                        child)
+                    child = __ID3(tree, filtered_data_dict[value],
+                                  best_root_attribute, value, path_to_parent +
+                                  "Attribute {attr} = {val}".format(
+                                  attr=best_root_attribute, val=value) + ",")
+                    # Attach child to parent
+                    tree.paste(parent_id, child)
+                    print(tree)
         return tree
     # Exception
     else:
@@ -193,23 +203,5 @@ def __ID3(data, parent_attribute, parent_attribute_value):
 
 
 if __name__ == "__main__":
-    tree = Tree()
-    tree.create_node("Harry", "harry", data=[3, 2, 1])  # root node
-    assert tree.get_node('harry').is_leaf()
-    tree.create_node("Jane", "jane", parent="harry")
-    tree.create_node("Bill", "bill", parent="harry")
-    tree.create_node("Diane", "diane", parent="jane")
-    tree.create_node("Mary", "mary", parent="diane")
-    tree.create_node("Mark", "mark", parent="jane", data=[0, 1, 2])
-    save_tree(tree, "test.json")
-    tree_test = load_tree("test.json")
-    print(tree)
-    print(tree.leaves())
-    # tree_test.paste('Mark', Tree())
-    print(tree_test)
-    save_tree(tree_test, "test2.json")
-    print(tree_test.leaves())
-    assert tree_test.get_node('Mark').is_leaf()
-
     data = Data.Data('iris')
     ID3(data)

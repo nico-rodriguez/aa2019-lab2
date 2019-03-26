@@ -25,12 +25,12 @@ class Data:
     to some cutting point, and 1 for the rest.
     '''
     def __init__(self, data_name):
-        print('Creating Data class instance')
+        #print('Creating Data class instance')
         self.data_name = data_name
         # Indicates if all instances belong to the same class
         self.monoclass_instances = None
         if (data_name == "iris"):
-            print('Iris data selected')
+            #print('Iris data selected')
             self.amount_attributes = 4
             self.attributes = [0, 1, 2, 3]
             self.attribute_values = {
@@ -44,7 +44,7 @@ class Data:
             self.global_class_distribution = {
                 'Iris-setosa': 1/3, 'Iris-versicolor': 1/3,
                 'Iris-virginica': 1/3}
-            print('Beginning iris data loading into Data instance')
+            #print('Beginning iris data loading into Data instance')
             with open(iris_processed_data, 'r') as instance_file:
                 instances_list = instance_file.readlines()
                 self.dataset = []
@@ -53,7 +53,7 @@ class Data:
                     instance_as_list = ast.literal_eval(line)
                     self.dataset.append(instance_as_list)
         else:
-            print('Covtype data selected')
+            #print('Covtype data selected')
             self.amount_attributes = 12
             self.attributes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
             self.attribute_values = {
@@ -73,7 +73,7 @@ class Data:
                 3: 2747/581012, 4: 9493/581012, 5: 17367/581012,
                 6: 20510/581012
             }
-            print('Beginning covtype data loading into Data instance')
+            #print('Beginning covtype data loading into Data instance')
             with open(covtype_processed_data, 'r') as instance_file:
                 instances_list = instance_file.readlines()
                 self.dataset = []
