@@ -74,7 +74,7 @@ returns a classification tree following ID3 algorithm.
 
 def ID3(data):
     tree = Tree()
-    return __ID3(tree, data, None, None, None)
+    return __ID3(tree, data, None, None, None, {})
 
 
 '''
@@ -88,7 +88,7 @@ Returns a decision tree of treelib type.
 
 
 def __ID3(tree, data, parent_attribute, parent_attribute_value,
-          path_to_parent):
+          path_to_parent, cutting_values):
     parent_id = path_to_parent
     if path_to_parent is None:
         path_to_parent = ""
@@ -99,7 +99,7 @@ def __ID3(tree, data, parent_attribute, parent_attribute_value,
                          path_to_parent + 'Attribute {attr} = {val}'.format(
                          attr=parent_attribute, val=parent_attribute_value)
                          + ",", parent_id)
-        return tree
+        return tree, cutting_values
     # The are no attributes left
     if data.amount_attributes == 0:
         # First consider the case where there are no examples left
@@ -112,7 +112,7 @@ def __ID3(tree, data, parent_attribute, parent_attribute_value,
                 'Attribute {attr} = {val}'.format(
                     attr=parent_attribute,
                     val=parent_attribute_value) + ",", parent_id)
-            return tree
+            return tree, cutting_values
         # If there are examples left, sort the label according to the
         # class distribution known by the parent node
         else:
@@ -124,7 +124,7 @@ def __ID3(tree, data, parent_attribute, parent_attribute_value,
                 'Attribute {attr} = {val}'.format(
                     attr=parent_attribute, val=parent_attribute_value) +
                 ",", parent_id)
-            return tree
+            return tree, cutting_values
     # There are attributes left
     elif data.amount_attributes > 0:
         if len(data.dataset) == 0:
@@ -136,7 +136,7 @@ def __ID3(tree, data, parent_attribute, parent_attribute_value,
                 'Attribute {attr} = {val}'.format(
                     attr=parent_attribute, val=parent_attribute_value) + ",",
                 parent_id)
-            return tree
+            return tree, cutting_values
         else:
             # Choose best attribute
             best_root_attribute_list = []
@@ -173,6 +173,8 @@ def __ID3(tree, data, parent_attribute, parent_attribute_value,
                 data.split_attribute(best_root_attribute,
                                      spliting_value_for_attribute[
                                         best_root_attribute])
+                cutting_values[best_root_attribute] = (
+                    spliting_value_for_attribute[best_root_attribute])
             # Generate a branch for each possible value of the attribute
             filtered_data_dict = data.project_attribute(best_root_attribute)
             for value in data.attribute_values[best_root_attribute]:
@@ -191,26 +193,28 @@ def __ID3(tree, data, parent_attribute, parent_attribute_value,
                         + 'Attribute {attr} = {val}'.format(
                         attr=best_root_attribute, val=value) + ",",
                         parent_id)
-                    return tree
+                    return tree, cutting_values
                 # Recursive call
                 elif len(filtered_data_dict[value].dataset) > 0:
                     __ID3(tree, filtered_data_dict[value],
                           best_root_attribute, value, path_to_parent +
                           "Attribute {attr} = {val}".format(
                           attr=parent_attribute,
-                          val=parent_attribute_value) + ",")
-        return tree
+                          val=parent_attribute_value) + ",", cutting_values)
+        return tree, cutting_values
     # Exception
     else:
         return "ID3.__ID3: data.amount_attributes can't be negative."
 
 
 if __name__ == "__main__":
-    '''
+
     data = Data.Data('iris')
-    tree = ID3(data)
+    tree, cuts = ID3(data)
     tree.show(idhidden=False)
+    print(cuts)
     '''
     data2 = Data.Data('covtype')
     tree2 = ID3(data2)
     tree2.show(idhidden=False)
+    '''
