@@ -203,6 +203,63 @@ class Data:
 
         return projections_dict
 
+    '''
+    recalculates global and local distributions
+    taking current dataset
+    '''
+    def recalculate_distributions(self):
+        new_distribution = {}
+        for instance in self.dataset:
+            new_distribution[instance[-1]] += 1
+        for value in new_distribution.values:
+            value /= len(self.dataset)
+        self.global_class_distribution = new_distribution
+        self.class_distribution = new_distribution
+
+
+    '''
+    creates both validation and training sets from data
+    percentage takes values from 0 and 1
+    '''
+    def divide_corpus(self, percetnage_training):
+        validation_set = self.dataset.copy()
+        training_set = []
+        partition_length = round(len(self.dataset) * percetnage_training)
+        for i in range(0, partition_length):
+            data_index = random.randint(0, len(validation_set)-1)
+            training_set.append(validation_set[data_index])
+            # data thats on training set cant be on validation set
+            del validation_set[data_index]
+
+        data_training = Data("iris")
+        data_training.dataset = training_set
+        data_training.data_name = self.data_name
+        data_training.amount_attributes = self.amount_attributes
+        data_training.attributes = self.attributes.copy()
+        data_training.attribute_values = self.attribute_values.copy()
+        data_training.amount_classes = self.amount_classes
+        data_training.classes = self.classes.copy()
+        data_training.class_distribution = self.class_distribution.copy()
+
+        data_validation = Data("iris")
+        data_validation.dataset = validation_set
+        data_validation.data_name = self.data_name
+        data_validation.amount_attributes = self.amount_attributes
+        data_validation.attributes = self.attributes.copy()
+        data_validation.attribute_values = self.attribute_values.copy()
+        data_validation.amount_classes = self.amount_classes
+        data_validation.classes = self.classes.copy()
+        data_validation.class_distribution = self.class_distribution.copy()
+        return (data_training, data_validation)
+    
+    def apply_breakpoints(self, breakpoints):
+        for attribute in breakpoints.keys():
+            for data in self.dataset:
+                if data[attribute] <= breakpoints[attribute]:
+                    data[attribute] = 0
+                else:
+                    data[attribute] = 1
+
 
 if __name__ == '__main__':
 
