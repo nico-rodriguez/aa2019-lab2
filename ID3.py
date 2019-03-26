@@ -89,9 +89,12 @@ Returns a decision tree of treelib type.
 '''
 
 
-def __ID3(tree, data, parent_attribute, parent_attribute_value, path_to_parent):
+def __ID3(tree, data, parent_attribute, parent_attribute_value,
+          path_to_parent):
+    tree.show(idhidden=False)
+    print(path_to_parent)
     parent_id = path_to_parent
-    if path_to_parent is None: 
+    if path_to_parent is None:
         path_to_parent = ""
     # All remaining instances belong to the same class
     if data.monoclass_instances is not None:
@@ -184,6 +187,9 @@ def __ID3(tree, data, parent_attribute, parent_attribute_value, path_to_parent):
                     tree.create_node('Class {c}'.format(c=sorted_class),
                                      path_to_parent +
                                      'Attribute {attr} = {val}'.format(
+                                        attr=parent_attribute,
+                                        val=parent_attribute_value) +
+                                     'Attribute {attr} = {val}'.format(
                                     attr=best_root_attribute, val=value) + ",",
                                     parent_id)
                     return tree
@@ -203,8 +209,9 @@ def __ID3(tree, data, parent_attribute, parent_attribute_value, path_to_parent):
 if __name__ == "__main__":
     data = Data.Data('iris')
     tree = ID3(data)
-    # tree.show(idhidden=False)
-
+    tree.show(idhidden=False)
+    '''
     data2 = Data.Data('covtype')
     tree2 = ID3(data2)
     tree2.show(idhidden=False)
+    '''

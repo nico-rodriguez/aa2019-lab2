@@ -111,9 +111,9 @@ class Data:
     def best_cutting_value(self, attribute):
         best_cutting_value = None
         best_profit = None
-        if len(self.dataset) > 10:
+        if len(self.dataset) > 4:
             random_indices = random.sample(
-                list(range(len(self.dataset))), 10)
+                list(range(len(self.dataset))), 4)
         else:
             random_indices = list(range(len(self.dataset)))
 
