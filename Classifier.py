@@ -66,6 +66,80 @@ def classify(tree, instance, distribution):
                     + str(distribution[random_class]))
     return current_node.tag
 
+# for each element of the dataset, if the element has the label label, it sets that
+# attribute to 1, otherwise 0
+# allow new new memory
+def map_dataset(dataset, label):
+    new_dataset = dataset.copy()
+    for row in new_dataset:
+        last_index = len(row)-1
+        last_item = row[last_index]
+        if last_item == label:
+            row[last_index] = (label) 
+        else:
+            row[last_index] = ("NO"+label)
+        
+    return new_dataset
+
+# separates
+def classify_dataset(data):
+    IDtrees = []
+    validation_sets = []
+    for clss_label in data.classes:
+        # Transform the data dataset
+        mapped_data = map_dataset(data.dataset, clss_label)
+        (training_set, validation_set) = divide_corpus(data, 0.8)
+        new_data = data.copy()
+
+        # Transform the data metadata
+        new_data.dataset = training_set
+        new_data.amount_classes = 2
+        other_classes_label = "NO"+clss_label
+        new_data.classes = [clss_label, other_classes_label]
+        distr = 0.0
+        for key in data.class_distribution.keys()
+            if key != clss_label:
+                distr += new_data.class_distribution[key]
+        new_data.class_distribution = {clss_label: 1-distr, other_classes_label: distr}
+        new_data.global_class_distribution = {clss_label: 1-distr, other_classes_label: distr}
+        validation_sets.append(validation_set)
+        IDtrees.append(ID3(new_data))
+    for entry in validation_sets:
+        tags = []
+        count = 0
+        for tree in IDtrees:
+            classify_result = classify(tree, entry)
+            class_value = int(re.findall(r'Instances \d+', classify_result))
+            instances_count = int(re.findall(r'Class \d+', classify_result))
+            tags.append([count, class_value, instances_count])
+            count += 1
+        
+
+# returns the id of which tag of the processed tags of 
+# the tree wins (which one is chosen for the input)
+def process_tags(tags):
+
+    def filter_func(elem):
+        return elem[1] == 1
+
+    def map_func(elem):
+        return elem[2]
+
+    def max(a,b):
+        if a >= b:
+            return a
+        else:
+            return b
+
+    def isEqual(value, elem):
+        return elem[2] == value
+
+    filtered_tags = filter(filter_func,tags)
+    mapped_tags = map(map_func, filtered_tags)
+    max_val = foldr max tags[0][2] mapped_tags
+    max_tags = filter((isEqual max_val), filtered_tags)
+    return (random.sample(max_tags, 1))[0]
+
 
 if __name__ == "__main__":
     data = Data.Data('iris')
