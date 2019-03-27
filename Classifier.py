@@ -93,7 +93,7 @@ def classify_dataset(data):
     for clss_label in data.classes:
         # Transform the data dataset
         mapped_data = map_dataset(data.dataset, clss_label)
-        (training_set, validation_set) = divide_corpus(data, 0.8)
+        (training_set, validation_set) = data.divide_corpus(0.8)
         new_data = data.copy()
 
         # Transform the data metadata
