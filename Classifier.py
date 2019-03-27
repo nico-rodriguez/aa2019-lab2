@@ -7,7 +7,6 @@ ID3 decsion trees.
 
 import ID3
 import Data
-import Evaluator
 import Utils
 import random
 import re
@@ -29,9 +28,10 @@ def k_fold_cross_validation(data, k):
         for i in range(0, k_partition_len):
             data_index = random.randint(0, len(dataset_aux))
             aux_list.append(dataset_aux[data_index])
-            del dataset_aux[data_index] # we remove it to avoid duplicates
-            del dataset_training_aux[data_index] # an element in the validation set isnt in the 
-                                                 # training set for this iteration
+            del dataset_aux[data_index]  # we remove it to avoid duplicates
+            # an element in the validation set isnt in the training set for
+            # this iteration
+            del dataset_training_aux[data_index]
         k_division_list.append(aux_list)
         # the k division list is used as this iterations validation set
         result_list.append((dataset_training_aux, aux_list.copy()))
@@ -50,8 +50,8 @@ def classify(tree, instance, distribution):
     current_node = tree.get_node(current_path)
     # while we havent hit a leave
     while "Class" not in current_node.tag:
-        # node tags are in the form "attribute x" where x is its id which is 
-        # fecthed a simple regex
+        # node tags are in the form "attribute x" where x is its id which
+        # is fecthed a simple regex
         current_attribute = int(re.findall(r'\d+', current_node.tag)[0])
         attribute_value = instance[current_attribute]
         # continue to move inside tree with the transition
@@ -66,22 +66,27 @@ def classify(tree, instance, distribution):
                     + str(distribution[random_class]))
     return current_node.tag
 
-# for each element of the dataset, if the element has the label label, it sets that
-# attribute to 1, otherwise 0
-# allow new new memory
+
+'''
+For each element of the dataset, if the element has the label label, it sets
+that attribute to 1, otherwise 0 allow new new memory.
+'''
+
+
 def map_dataset(dataset, label):
     new_dataset = dataset.copy()
     for row in new_dataset:
         last_index = len(row)-1
         last_item = row[last_index]
         if last_item == label:
-            row[last_index] = (label) 
+            row[last_index] = (label)
         else:
             row[last_index] = ("NO"+label)
-        
     return new_dataset
 
 # separates
+
+
 def classify_dataset(data):
     IDtrees = []
     validation_sets = []
@@ -101,7 +106,8 @@ def classify_dataset(data):
             if key != clss_label:
                 distr += new_data.class_distribution[key]
         new_data.class_distribution = {clss_label: 1-distr, other_classes_label: distr}
-        new_data.global_class_distribution = {clss_label: 1-distr, other_classes_label: distr}
+        new_data.global_class_distribution = {
+            clss_label: 1-distr, other_classes_label: distr}
         validation_sets.append(validation_set)
         IDtrees.append(ID3(new_data))
     for entry in validation_sets:
@@ -113,7 +119,7 @@ def classify_dataset(data):
             instances_count = int(re.findall(r'Class \d+', classify_result))
             tags.append([count, class_value, instances_count])
             count += 1
-        
+
 
 # returns the tag index of which tag of the
 # the tree wins (which one is chosen for the input)
@@ -125,7 +131,7 @@ def process_tags(tags):
     def map_func(elem):
         return elem[2]
 
-    def max(a,b):
+    def max(a, b):
         if a >= b:
             return a
         else:
@@ -134,10 +140,10 @@ def process_tags(tags):
     def isEqual(value, elem):
         return elem[2] == value
 
-    filtered_tags = filter(filter_func,tags)
+    filtered_tags = filter(filter_func, tags)
     mapped_tags = map(map_func, filtered_tags)
-    max_val = foldr (max) (tags[0][2]) (mapped_tags)
-    max_tags = filter((isEqual (max_val)), filtered_tags)
+    max_val = foldr(max)(tags[0][2])(mapped_tags)
+    max_tags = filter((isEqual(max_val)), filtered_tags)
     return (random.sample(max_tags, 1))[0]
 
 
