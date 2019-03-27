@@ -5,6 +5,7 @@ This module's responsibility is to classify a preprocessed data set using n
 ID3 decsion trees.
 '''
 
+import copy
 import ID3
 import Data
 import Utils
@@ -45,7 +46,6 @@ def k_fold_cross_validation(data, k):
 # returns the class of the instance according to tree
 def classify(tree, instance, distribution):
     # first node is fetched by hand
-    # print(instance)
     current_path = "Attribute None = None,"
     current_node = tree.get_node(current_path)
     # while we havent hit a leave
@@ -57,7 +57,6 @@ def classify(tree, instance, distribution):
         # continue to move inside tree with the transition
         current_path = (current_path + "Attribute " + str(current_attribute) +
                         " = " + str(attribute_value) + ",")
-        # print(current_path)
         current_node = tree.get_node(current_path)
         if current_node is None:
             random_class = Utils.weighted_random(
@@ -69,57 +68,54 @@ def classify(tree, instance, distribution):
 
 '''
 For each element of the dataset, if the element has the label label, it sets
-that attribute to 1, otherwise 0 allow new new memory.
+that attribute to 1, otherwise 0, generates new memory for the result.
 '''
 
-
 def map_dataset(dataset, label):
-    new_dataset = dataset.copy()
+    new_dataset = copy.deepcopy(dataset)
     for row in new_dataset:
-        last_index = len(row)-1
-        last_item = row[last_index]
-        if last_item == label:
-            row[last_index] = (label)
-        else:
-            row[last_index] = ("NO"+label)
+        row[-1] = 1 if row[-1] == label else 0
     return new_dataset
 
-# separates
-
-
-def classify_dataset(data):
+#receives data with 80 percent of the data.dataset for training
+#returns array with n classification trees where n is the amount of classes
+def generate_classifier(data):
     IDtrees = []
-    validation_sets = []
-    for clss_label in data.classes:
+    for class_label in data.classes:
         # Transform the data dataset
-        mapped_data = map_dataset(data.dataset, clss_label)
-        (training_set, validation_set) = data.divide_corpus(0.8)
+        mapped_data = map_dataset(data.dataset, class_label)
         new_data = data.copy()
-
+        new_data.dataset = mapped_data
         # Transform the data metadata
-        new_data.dataset = training_set
         new_data.amount_classes = 2
-        other_classes_label = "NO"+clss_label
-        new_data.classes = [clss_label, other_classes_label]
-        distr = 0.0
-        for key in data.class_distribution.keys():
-            if key != clss_label:
-                distr += new_data.class_distribution[key]
-        new_data.class_distribution = {clss_label: 1-distr, other_classes_label: distr}
-        new_data.global_class_distribution = {
-            clss_label: 1-distr, other_classes_label: distr}
-        validation_sets.append(validation_set)
-        IDtrees.append(ID3(new_data))
-    for entry in validation_sets:
-        tags = []
-        count = 0
-        for tree in IDtrees:
-            classify_result = classify(tree, entry)
-            class_value = int(re.findall(r'Instances \d+', classify_result))
-            instances_count = int(re.findall(r'Class \d+', classify_result))
-            tags.append([count, class_value, instances_count])
-            count += 1
+        new_data.classes = [1, 0]
+        label_distribution = new_data.class_distribution[class_label]
+        new_data.class_distribution = {1: label_distribution, 0: 1-label_distribution}
+        new_data.global_class_distribution = {1: label_distribution, 0: 1-label_distribution}
+        idtree = ID3.ID3(new_data)[0]
+        IDtrees.append((idtree,new_data.class_distribution))
+    return IDtrees
 
+#classifies a multi-label dataset and returns the generated labels for it
+def classify_dataset_multi_label(classifier, dataset):
+    labels = []
+    for entry in dataset:
+        label = classify_multi_label(classifier, entry)
+        labels.append(label)
+    return labels
+
+#classifies an entry using the multi-label classifier classifier
+def classify_multi_label(classifier, entry):
+    tags = []
+    count = 0
+    for tree in classifier:
+        classify_result = classify(tree[0], entry, tree[1])
+        instances_count = float(re.findall(r'Instances (\d+\.\d)+', classify_result)[0])
+        class_value = int(re.findall(r'Class (\d)+', classify_result)[0])
+        tags.append([count, class_value, instances_count])
+        count += 1
+    label = tags[process_tags(tags)[0]][0]
+    return label
 
 # returns the tag index of which tag of the
 # the tree wins (which one is chosen for the input)
@@ -131,23 +127,31 @@ def process_tags(tags):
     def map_func(elem):
         return elem[2]
 
-    def max(a, b):
-        if a >= b:
-            return a
-        else:
-            return b
-
     def isEqual(value, elem):
         return elem[2] == value
 
-    filtered_tags = filter(filter_func, tags)
-    mapped_tags = map(map_func, filtered_tags)
-    max_val = foldr(max)(tags[0][2])(mapped_tags)
-    max_tags = filter((isEqual(max_val)), filtered_tags)
+    filtered_tags = list(filter(filter_func, tags))
+    if len(filtered_tags) == 0:
+        filtered_tags = tags
+    mapped_tags = list(map(map_func, filtered_tags))
+    max_val = max(mapped_tags)
+    max_tags = []
+    for elem in filtered_tags:
+        if elem[2] == max_val:
+            max_tags.append(elem)
     return (random.sample(max_tags, 1))[0]
 
+#receives a list of indexes and a list of classes and returns a list of classes associated with each tag
+def map_to_tag(indexes, classes):
+    tags = []
+    for index in indexes:
+        tags.append(classes[index])
+    return tags
+
+# receives 3 trained trees
 
 if __name__ == "__main__":
+    '''
     data = Data.Data('iris')
     divided_corpus = data.divide_corpus(0.80)
     (iris_tree, breakpoints) = ID3.ID3(divided_corpus[0])
@@ -162,3 +166,9 @@ if __name__ == "__main__":
             instance))
     for instance in list_of_classified_instances:
         print(instance)
+'''
+    data = Data.Data('iris')
+    (data_training, data_validation) = data.divide_corpus(0.8)
+    classifier = generate_classifier(data_training)
+    indexes = classify_dataset_multi_label(classifier, data_validation.dataset)
+    print(map_to_tag(indexes, data.classes))

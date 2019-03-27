@@ -7,7 +7,7 @@ metadata from the given dataset.
 import ast
 import random
 import Utils
-
+import copy
 
 iris_processed_data = 'processed_data_iris.txt'
 covtype_processed_data = 'processed_data_covtype.txt'
@@ -144,14 +144,12 @@ class Data:
         # A dictionary value -> instances with that value in attribute
         projections_dict = {}
         for value in self.attribute_values[attribute]:
-            # Don't parse files for the new Data instances
-            projected_data = Data(self.data_name)
+            # Generate a copy of self
+            projected_data = self.copy()
             # Adjust remaining attributes and amount of them
-            projected_data.attributes = self.attributes.copy()
             projected_data.attributes.remove(attribute)
             projected_data.amount_attributes = self.amount_attributes - 1
             # Adjust dictionary of attribute -> values
-            projected_data.attribute_values = self.attribute_values.copy()
             del projected_data.attribute_values[attribute]
             # Re initialize class distribution (computed later)
             for i in range(len(projected_data.class_distribution)):
@@ -260,12 +258,25 @@ class Data:
                 else:
                     data[attribute] = 1
 
+    def copy(self):
+        data = Data(self.data_name)
+        data.dataset = copy.deepcopy(self.dataset)
+        data.data_name = self.data_name
+        data.amount_attributes = self.amount_attributes
+        data.attributes = self.attributes.copy()
+        data.attribute_values = self.attribute_values.copy()
+        data.amount_classes = self.amount_classes
+        data.classes = self.classes.copy()
+        data.class_distribution = self.class_distribution.copy()
+        return data
+
 
 if __name__ == '__main__':
 
     data = Data('iris')
-    print(data.dataset[0:20])
+    print(data.project_attribute(data.attributes[0]))
 
+    '''
     split_data = data.split_attribute(
         0, data.best_cutting_value(0)).project_attribute(0)
     with open('test.txt', 'w') as test_file:
@@ -274,6 +285,7 @@ if __name__ == '__main__':
         test_file.write('\n\n')
         for instance in split_data[1].dataset:
             test_file.write(str(instance) + '\n')
+            '''
     '''
     data2 = Data('covtype')
     print(data2.dataset[0:20])
