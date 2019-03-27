@@ -6,16 +6,19 @@ over a given preprocessed data set.
 '''
 
 import Classifier
+import Data
+import ID3
 
 '''
 This function evaluates a given tree's metrics: true positives, true negatives,
-false positives, false negatives, precision, recall, fall-off and F-measure.
+false positives, false negatives, precision, recall, fall-out and F-measure.
 verification_data is an instance of Data used to compute the metrics.
 It saves the metrics and the confusion matrix to a given file's path.
 '''
 
 
-def evaluate_tree(tree, verification_data, file_path):
+def evaluate_tree(tree, verification_data, global_class_distribution,
+                  file_path):
     '''
     Dictionary of dictionaries. confusion_matrix[class] has a dictionary
     with the instance number of each class.
@@ -29,29 +32,44 @@ def evaluate_tree(tree, verification_data, file_path):
         for c2 in verification_data.classes:
             confusion_matrix[c1][c2] = 0
 
+    # Amount of examples of each class
+    amount_instances = {}
+
+    precision_macro, recall_macro, fall_out_macro, f_measure_macro = 0, 0, 0, 0
+    precision_micro, recall_micro, fall_out_micro, f_measure_micro = 0, 0, 0, 0
+
+    for c in verification_data.classes:
+        amount_instances[c] = 0
+
     for instance in verification_data.dataset:
-        classified_class_node_tag = Classifier.classify(tree, instance)
+        classified_class_node_tag = Classifier.classify(
+            tree, instance, global_class_distribution)
 
-        classified_class = classified_class_node_tag.split('Class ')[1]
-        true_class = str(verification_data.dataset[-1])
+        classified_class = classified_class_node_tag.split(
+            'Class ')[1].split(',')[0]
+        true_class = str(instance[-1])
 
-        confusion_matrix[true_class][classified_class] += 1
+        amount_instances[true_class] += 1
+
+        print('true_class: ', true_class)
+        print('classified_class: ', classified_class)
+        confusion_matrix[classified_class][true_class] += 1
 
     with open(file_path, 'w') as output:
-        spaces = 15
-        output.write('Confusion Matrix\n\n')
-        output.write(' '*spaces + 'Actual class\n')
+        spaces = 16
+        output.write('Confusion Matrix\n')
+        output.write(' '*(spaces + 4) + 'Actual class\n')
         output.write(' '*spaces)
-        classes = list(verification_data.classes.keys())
+        classes = list(verification_data.classes)
         for c in classes:
             output.write('%{spaces}s'.format(spaces=spaces) % c)
 
         output.write('\n')
         for c1 in classes:
-            output.write('%{spaces}s{c}'.format(spaces=spaces, c=c1))
+            output.write('%{spaces}s'.format(spaces=spaces) % c1)
             for c2 in classes:
-                output.write('%{spaces}s{num}'.format(
-                    spaces=spaces, num=confusion_matrix[c1][c2]))
+                output.write('%{spaces}d'.format(
+                    spaces=spaces) % confusion_matrix[c1][c2])
             output.write('\n')
 
         output.write('\n')
@@ -59,23 +77,94 @@ def evaluate_tree(tree, verification_data, file_path):
             output.write('Metrics for class {c} classification\n'.format(c=c))
 
             true_positives = confusion_matrix[c][c]
-            output.write('True Positives = {val}'.format(val=true_positives))
+            output.write('True Positives = {val}\n'.format(val=true_positives))
 
             false_positives, false_negatives = 0, 0
             for c2 in classes:
                 if c != c2:
                     false_positives += confusion_matrix[c][c2]
                     false_negatives += confusion_matrix[c2][c]
-            output.write('False Positives = {val}'.format(val=false_positives))
-            output.write('False Negatives = {val}'.format(val=false_negatives))
+            output.write('False Positives = {val}\n'.format(
+                val=false_positives))
+            output.write('False Negatives = {val}\n'.format(
+                val=false_negatives))
 
             true_negatives = 0
             for c1 in classes:
                 for c2 in classes:
                     if c1 != c and c2 != c:
                         true_negatives += confusion_matrix[c1][c2]
-            output.write('True Negatives = {val}'.format(val=true_negatives))
+            output.write('True Negatives = {val}\n'.format(val=true_negatives))
+
+            precision = true_positives/(true_positives+false_positives)
+            output.write('Precision = {val}\n'.format(val=precision))
+
+            recall = true_positives/(true_positives+false_negatives)
+            output.write('Recall = {val}\n'.format(val=recall))
+
+            fall_out = false_positives/(false_positives+true_negatives)
+            output.write('Fall-out = {val}\n'.format(val=fall_out))
+
+            f_measure = (0.5/precision) + (0.5/recall)
+            output.write('F-Measure = {val}\n'.format(val=f_measure))
+
+            precision_macro += precision
+            recall_macro += recall
+            fall_out_macro += fall_out
+            f_measure_macro += f_measure
+
+            precision_micro += amount_instances[c]*precision
+            recall_micro += amount_instances[c]*recall
+            fall_out_micro += amount_instances[c]*fall_out
+            f_measure_micro += amount_instances[c]*f_measure
+
+            output.write('\n\n')
+
+        class_number = verification_data.amount_classes
+
+        precision_macro /= class_number
+        recall_macro /= class_number
+        fall_out_macro /= class_number
+        f_measure_macro /= class_number
+
+        instances_number = len(verification_data.dataset)
+        precision_micro /= instances_number
+        recall_micro /= instances_number
+        fall_out_micro /= instances_number
+        f_measure_micro /= instances_number
+
+        output.write('Macro measures\n')
+        output.write('Precision = {val}\n'.format(val=precision_macro))
+        output.write('Recall = {val}\n'.format(val=recall_macro))
+        output.write('Fall-out = {val}\n'.format(val=fall_out_macro))
+        output.write('F-Measure = {val}\n'.format(val=f_measure_macro))
+
+        output.write('\n\n')
+
+        output.write('Micro measures\n')
+        output.write('Precision = {val}\n'.format(val=precision_micro))
+        output.write('Recall = {val}\n'.format(val=recall_micro))
+        output.write('Fall-out = {val}\n'.format(val=fall_out_micro))
+        output.write('F-Measure = {val}\n'.format(val=f_measure_micro))
+
+        output.write('\n')
 
 
 if __name__ == '__main__':
-    pass
+    data = Data.Data('iris')
+    divided_corpus = data.divide_corpus(0.80)
+    (iris_tree, breakpoints) = ID3.ID3(divided_corpus[0])
+    divided_corpus[0].apply_breakpoints(breakpoints)
+    divided_corpus[1].apply_breakpoints(breakpoints)
+    # iris_tree.show(idhidden=False)
+    list_of_classified_instances = []
+    for instance in divided_corpus[1].dataset:
+        list_of_classified_instances.append((
+            Classifier.classify(iris_tree, instance,
+                                divided_corpus[0].global_class_distribution),
+            instance))
+    for instance in list_of_classified_instances:
+        print(instance)
+
+    evaluate_tree(iris_tree, divided_corpus[1],
+                  divided_corpus[0].global_class_distribution, 'Evaluator.out')

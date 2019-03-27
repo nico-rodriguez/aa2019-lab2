@@ -45,7 +45,7 @@ def k_fold_cross_validation(data, k):
 # returns the class of the instance according to tree
 def classify(tree, instance, distribution):
     # first node is fetched by hand
-    print(instance)
+    # print(instance)
     current_path = "Attribute None = None,"
     current_node = tree.get_node(current_path)
     # while we havent hit a leave
@@ -57,12 +57,12 @@ def classify(tree, instance, distribution):
         # continue to move inside tree with the transition
         current_path = (current_path + "Attribute " + str(current_attribute) +
                         " = " + str(attribute_value) + ",")
-        print(current_path)
+        # print(current_path)
         current_node = tree.get_node(current_path)
         if current_node is None:
             random_class = Utils.weighted_random(
                 list(distribution.keys()), list(distribution.values()))
-            return ("Class " + str(random_class) + " Instances "
+            return ("Class " + str(random_class) + ",Instances "
                     + str(distribution[random_class]))
     return current_node.tag
 
