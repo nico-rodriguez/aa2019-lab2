@@ -2,52 +2,56 @@ Confusion Matrix
                     Actual class
                      Iris-setosa Iris-versicolor  Iris-virginica
      Iris-setosa              11               0               0
- Iris-versicolor               5               4               1
-  Iris-virginica               0               0               9
+ Iris-versicolor               0               6               1
+  Iris-virginica               0               3               9
+
+              11               0               0
+               0               6               1
+               0               3               9
 
 Metrics for class Iris-setosa classification
 True Positives = 11
 False Positives = 0
-False Negatives = 5
-True Negatives = 14
+False Negatives = 0
+True Negatives = 19
 Precision = 1.0
-Recall = 0.6875
+Recall = 1.0
 Fall-out = 0.0
-F-Measure = 1.2272727272727273
+F-Measure = 1.0
 
 
 Metrics for class Iris-versicolor classification
-True Positives = 4
-False Positives = 6
-False Negatives = 0
+True Positives = 6
+False Positives = 1
+False Negatives = 3
 True Negatives = 20
-Precision = 0.4
-Recall = 1.0
-Fall-out = 0.23076923076923078
-F-Measure = 1.75
+Precision = 0.8571428571428571
+Recall = 0.6666666666666666
+Fall-out = 0.047619047619047616
+F-Measure = 1.3333333333333335
 
 
 Metrics for class Iris-virginica classification
 True Positives = 9
-False Positives = 0
+False Positives = 3
 False Negatives = 1
-True Negatives = 20
-Precision = 1.0
+True Negatives = 17
+Precision = 0.75
 Recall = 0.9
-Fall-out = 0.0
-F-Measure = 1.0555555555555556
+Fall-out = 0.15
+F-Measure = 1.2222222222222223
 
 
 Macro measures
-Precision = 0.7999999999999999
-Recall = 0.8624999999999999
-Fall-out = 0.07692307692307693
-F-Measure = 1.3442760942760943
+Precision = 0.8690476190476191
+Recall = 0.8555555555555555
+Fall-out = 0.06587301587301587
+F-Measure = 1.1851851851851853
 
 
 Micro measures
-Precision = 0.92
-Recall = 0.8
-Fall-out = 0.03076923076923077
-F-Measure = 1.2397306397306396
+Precision = 0.8738095238095238
+Recall = 0.8666666666666667
+Fall-out = 0.0642857142857143
+F-Measure = 1.174074074074074
 

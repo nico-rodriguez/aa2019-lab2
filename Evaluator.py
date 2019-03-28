@@ -13,12 +13,16 @@ import ID3
 '''
 Given a list of tuples (true_class, classified_class), and the classes labels,
 it saves the evaluation metrics in the file specified in file_path.
+This function evaluates a given classifier's metrics: true positives,
+true negatives, false positives, false negatives, precision, recall, fall-out
+and F-measure.
+It saves the metrics and the confusion matrix to a given file's path.
 '''
 
 
-def generate_evaluation_data(classification, classes,
-                             instances, instances_number,
-                             file_path):
+def evaluate_classificator(classification, classes,
+                           instances, instances_number,
+                           file_path):
     '''
     Dictionary of dictionaries. confusion_matrix[class] has a dictionary
     with the instance number of each class.
@@ -52,10 +56,16 @@ def generate_evaluation_data(classification, classes,
         output.write(' '*spaces)
         for c in classes:
             output.write('%{spaces}s'.format(spaces=spaces) % c)
-
         output.write('\n')
         for c1 in classes:
             output.write('%{spaces}s'.format(spaces=spaces) % c1)
+            for c2 in classes:
+                output.write('%{spaces}d'.format(
+                    spaces=spaces) % confusion_matrix[c1][c2])
+            output.write('\n')
+
+        output.write('\n')
+        for c1 in classes:
             for c2 in classes:
                 output.write('%{spaces}d'.format(
                     spaces=spaces) % confusion_matrix[c1][c2])
@@ -138,36 +148,14 @@ def generate_evaluation_data(classification, classes,
         output.write('\n')
 
 
-'''
-This function evaluates a given tree's metrics: true positives, true negatives,
-false positives, false negatives, precision, recall, fall-out and F-measure.
-verification_data is an instance of Data used to compute the metrics.
-It saves the metrics and the confusion matrix to a given file's path.
-'''
-
-
-def evaluate_tree(tree, verification_data, file_path):
-
-    classification = Classifier.classify_dataset_tree(tree, verification_data)
-    generate_evaluation_data(classification, verification_data.classes,
-                             verification_data.dataset,
-                             len(verification_data.dataset), file_path)
-
-
 if __name__ == '__main__':
     data = Data.Data('iris')
-    divided_corpus = data.divide_corpus(0.80)
-    (iris_tree, breakpoints) = ID3.ID3(divided_corpus[0])
-    divided_corpus[0].apply_breakpoints(breakpoints)
-    divided_corpus[1].apply_breakpoints(breakpoints)
-    # iris_tree.show(idhidden=False)
-    list_of_classified_instances = []
-    for instance in divided_corpus[1].dataset:
-        list_of_classified_instances.append((
-            Classifier.classify(iris_tree, instance,
-                                divided_corpus[0].global_class_distribution),
-            instance))
-    for instance in list_of_classified_instances:
-        print(instance)
+    (data_training, data_validation) = data.divide_corpus(0.8)
+    classifier, breakpoints = ID3.ID3(data_training)
+    data_validation.apply_breakpoints(breakpoints)
+    classification = Classifier.classify_dataset_tree(classifier,
+                                                      data_validation)
 
-    evaluate_tree(iris_tree, divided_corpus[1], 'Evaluator.out')
+    evaluate_classificator(classification, data_validation.classes,
+                           data_validation.dataset,
+                           len(data_validation.dataset), 'Evaluator.out')
