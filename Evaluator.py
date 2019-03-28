@@ -11,12 +11,16 @@ import ID3
 
 
 '''
-Given a list of tuples (true_class, classified_class), and the classes labels,
-it saves the evaluation metrics in the file specified in file_path.
 This function evaluates a given classifier's metrics: true positives,
 true negatives, false positives, false negatives, precision, recall, fall-out
 and F-measure.
 It saves the metrics and the confusion matrix to a given file's path.
+- classification is a list of tuples (true_class, classified_class).
+- classes is a list with all the possible class labels.
+- instances is a list of instances (a list of lists) corresponding to the
+verification instances.
+- instances_number is the number of instances in 'instances'.
+- file_path is the route to the file for saving the evaluation metrics.
 '''
 
 
