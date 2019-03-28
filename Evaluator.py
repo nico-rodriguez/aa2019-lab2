@@ -146,8 +146,7 @@ It saves the metrics and the confusion matrix to a given file's path.
 '''
 
 
-def evaluate_tree(tree, verification_data, global_class_distribution,
-                  file_path):
+def evaluate_tree(tree, verification_data, file_path):
 
     classification = Classifier.classify_dataset_tree(tree, verification_data)
     generate_evaluation_data(classification, verification_data.classes,
@@ -171,5 +170,4 @@ if __name__ == '__main__':
     for instance in list_of_classified_instances:
         print(instance)
 
-    evaluate_tree(iris_tree, divided_corpus[1],
-                  divided_corpus[0].global_class_distribution, 'Evaluator.out')
+    evaluate_tree(iris_tree, divided_corpus[1], 'Evaluator.out')
