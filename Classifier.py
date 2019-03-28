@@ -67,16 +67,16 @@ def classify(tree, instance, distribution):
 
 
 # Takes in a tree and a set of instances to be evaluated
-# returns the list of classified instances by tree
+# returns a list of tples classified instances by tree
 def classify_dataset_tree(tree, data):
     result_list = []
     # classify instances
     for instance in data.dataset:
-        result_node_tag = classify(tree, instance, 
+        result_node_tag = classify(tree, instance,
                                    data.global_class_distribution)
-        class_value = re.findall(r'Class ([^,]+)', result_node_tag)[0]
-        result_list.append(class_value)
-        print(class_value)
+        classified_class = re.findall(r'Class ([^,]+)', result_node_tag)[0]
+        true_class = instance[-1]
+        result_list.append((true_class, classified_class))
     return result_list
 
 
@@ -164,7 +164,7 @@ def process_tags(tags):
     return (random.sample(max_tags, 1))[0]
 
 
-# receives a list of indexes and a list of classes and returns a list of 
+# receives a list of indexes and a list of classes and returns a list of
 # classes associated with each tag
 def map_to_tag(indexes, classes):
     tags = []
@@ -191,8 +191,8 @@ if __name__ == "__main__":
     for instance in list_of_classified_instances:
         print(instance)
 '''
-    data = Data.Data('no-iris')
+    data = Data.Data('iris')
     (data_training, data_validation) = data.divide_corpus(0.8)
     classifier = ID3.ID3(data_training)
     tags = classify_dataset_tree(classifier[0], data_validation)
-    #print(tags)
+    print(tags)
