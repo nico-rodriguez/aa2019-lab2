@@ -67,8 +67,8 @@ def load_tree(target_file):
 
 
 '''
-Given data (an instance of the Data class),
-returns a classification tree following ID3 algorithm.
+Given data (an instance of the Data class), returns a classification tree
+following an extension of the ID3 algorithm and the cutting points generated.
 '''
 
 
