@@ -285,8 +285,6 @@ if __name__ == '__main__':
         test_file.write('\n\n')
         for instance in split_data[1].dataset:
             test_file.write(str(instance) + '\n')
-            '''
-    '''
     data2 = Data('covtype')
     print(data2.dataset[0:20])
     '''

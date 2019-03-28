@@ -66,10 +66,26 @@ def classify(tree, instance, distribution):
     return current_node.tag
 
 
+# Takes in a tree and a set of instances to be evaluated
+# returns the list of classified instances by tree
+def classify_dataset_tree(tree, data):
+    result_list = []
+    new_id = 0
+    # classify instances
+    for instance in data.dataset:
+        result_node_tag = classify(tree, instance, 
+                                   data.global_class_distribution)
+        class_value = re.findall(r'Class ([^,]+)', result_node_tag)[0]
+        result_list.append(class_value)
+        print(class_value)
+    return result_list
+
+
 '''
 For each element of the dataset, if the element has the label label, it sets
 that attribute to 1, otherwise 0, generates new memory for the result.
 '''
+
 
 def map_dataset(dataset, label):
     new_dataset = copy.deepcopy(dataset)
@@ -77,9 +93,10 @@ def map_dataset(dataset, label):
         row[-1] = 1 if row[-1] == label else 0
     return new_dataset
 
-#receives data with 80 percent of the data.dataset for training
-#returns array with n classification trees where n is the amount of classes
-def generate_classifier(data):
+
+# receives data with 80 percent of the data.dataset for training
+# returns array with n classification trees where n is the amount of classes
+def generate_forest_classifier(data):
     IDtrees = []
     for class_label in data.classes:
         # Transform the data dataset
@@ -90,13 +107,16 @@ def generate_classifier(data):
         new_data.amount_classes = 2
         new_data.classes = [1, 0]
         label_distribution = new_data.class_distribution[class_label]
-        new_data.class_distribution = {1: label_distribution, 0: 1-label_distribution}
-        new_data.global_class_distribution = {1: label_distribution, 0: 1-label_distribution}
+        new_data.class_distribution = {1: label_distribution,
+                                       0: 1-label_distribution}
+        new_data.global_class_distribution = {1: label_distribution,
+                                              0: 1-label_distribution}
         idtree = ID3.ID3(new_data)[0]
-        IDtrees.append((idtree,new_data.class_distribution))
+        IDtrees.append((idtree, new_data.class_distribution))
     return IDtrees
 
-#classifies a multi-label dataset and returns the generated labels for it
+
+# classifies a multi-label dataset and returns the generated labels for it
 def classify_dataset_multi_label(classifier, dataset):
     labels = []
     for entry in dataset:
@@ -104,18 +124,21 @@ def classify_dataset_multi_label(classifier, dataset):
         labels.append(label)
     return labels
 
-#classifies an entry using the multi-label classifier classifier
+
+# classifies an entry using the multi-label classifier classifier
 def classify_multi_label(classifier, entry):
     tags = []
     count = 0
     for tree in classifier:
         classify_result = classify(tree[0], entry, tree[1])
-        instances_count = float(re.findall(r'Instances (\d+\.\d)+', classify_result)[0])
+        instances_count = float(re.findall(r'Instances (\d+\.\d)+',
+                                classify_result)[0])
         class_value = int(re.findall(r'Class (\d)+', classify_result)[0])
         tags.append([count, class_value, instances_count])
         count += 1
     label = tags[process_tags(tags)[0]][0]
     return label
+
 
 # returns the tag index of which tag of the
 # the tree wins (which one is chosen for the input)
@@ -141,15 +164,17 @@ def process_tags(tags):
             max_tags.append(elem)
     return (random.sample(max_tags, 1))[0]
 
-#receives a list of indexes and a list of classes and returns a list of classes associated with each tag
+
+# receives a list of indexes and a list of classes and returns a list of 
+# classes associated with each tag
 def map_to_tag(indexes, classes):
     tags = []
     for index in indexes:
         tags.append(classes[index])
     return tags
 
-# receives 3 trained trees
 
+# receives 3 trained trees
 if __name__ == "__main__":
     '''
     data = Data.Data('iris')
@@ -167,8 +192,8 @@ if __name__ == "__main__":
     for instance in list_of_classified_instances:
         print(instance)
 '''
-    data = Data.Data('iris')
+    data = Data.Data('no-iris')
     (data_training, data_validation) = data.divide_corpus(0.8)
-    classifier = generate_classifier(data_training)
-    indexes = classify_dataset_multi_label(classifier, data_validation.dataset)
-    print(map_to_tag(indexes, data.classes))
+    classifier = ID3.ID3(data_training)
+    tags = classify_dataset_tree(classifier[0], data_validation)
+    #print(tags)
