@@ -193,7 +193,7 @@ if __name__ == "__main__":
     for instance in list_of_classified_instances:
         print(instance)
 '''
-    data = Data.Data('covtype')
+    data = Data.Data('iris')
     (data_training, data_validation) = data.divide_corpus(0.8)
     classifier = generate_forest_classifier(data_training)
     tags = classify_dataset_multi_label(classifier, data_validation)
