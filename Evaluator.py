@@ -9,16 +9,16 @@ import Classifier
 import Data
 import ID3
 
+
 '''
-This function evaluates a given tree's metrics: true positives, true negatives,
-false positives, false negatives, precision, recall, fall-out and F-measure.
-verification_data is an instance of Data used to compute the metrics.
-It saves the metrics and the confusion matrix to a given file's path.
+Given a list of tuples (true_class, classified_class), and the classes labels,
+it saves the evaluation metrics in the file specified in file_path.
 '''
 
 
-def evaluate_tree(tree, verification_data, global_class_distribution,
-                  file_path):
+def generate_evaluation_data(classification, classes,
+                             instances, instances_number,
+                             file_path):
     '''
     Dictionary of dictionaries. confusion_matrix[class] has a dictionary
     with the instance number of each class.
@@ -27,40 +27,29 @@ def evaluate_tree(tree, verification_data, global_class_distribution,
     '''
     confusion_matrix = {}
     # Initialize confusion_matrix
-    for c1 in verification_data.classes:
+    for c1 in classes:
         confusion_matrix[c1] = {}
-        for c2 in verification_data.classes:
+        for c2 in classes:
             confusion_matrix[c1][c2] = 0
 
     # Amount of examples of each class
     amount_instances = {}
+    for c in classes:
+        amount_instances[c] = 0
+
+    for instance in instances:
+        amount_instances[instance[-1]] += 1
+
+    for true_class, classified_class in classification:
+        confusion_matrix[classified_class][true_class] += 1
 
     precision_macro, recall_macro, fall_out_macro, f_measure_macro = 0, 0, 0, 0
     precision_micro, recall_micro, fall_out_micro, f_measure_micro = 0, 0, 0, 0
-
-    for c in verification_data.classes:
-        amount_instances[c] = 0
-
-    for instance in verification_data.dataset:
-        classified_class_node_tag = Classifier.classify(
-            tree, instance, global_class_distribution)
-
-        classified_class = classified_class_node_tag.split(
-            'Class ')[1].split(',')[0]
-        true_class = str(instance[-1])
-
-        amount_instances[true_class] += 1
-
-        print('true_class: ', true_class)
-        print('classified_class: ', classified_class)
-        confusion_matrix[classified_class][true_class] += 1
-
     with open(file_path, 'w') as output:
         spaces = 16
         output.write('Confusion Matrix\n')
         output.write(' '*(spaces + 4) + 'Actual class\n')
         output.write(' '*spaces)
-        classes = list(verification_data.classes)
         for c in classes:
             output.write('%{spaces}s'.format(spaces=spaces) % c)
 
@@ -120,14 +109,13 @@ def evaluate_tree(tree, verification_data, global_class_distribution,
 
             output.write('\n\n')
 
-        class_number = verification_data.amount_classes
+        class_number = len(classes)
 
         precision_macro /= class_number
         recall_macro /= class_number
         fall_out_macro /= class_number
         f_measure_macro /= class_number
 
-        instances_number = len(verification_data.dataset)
         precision_micro /= instances_number
         recall_micro /= instances_number
         fall_out_micro /= instances_number
@@ -148,6 +136,23 @@ def evaluate_tree(tree, verification_data, global_class_distribution,
         output.write('F-Measure = {val}\n'.format(val=f_measure_micro))
 
         output.write('\n')
+
+
+'''
+This function evaluates a given tree's metrics: true positives, true negatives,
+false positives, false negatives, precision, recall, fall-out and F-measure.
+verification_data is an instance of Data used to compute the metrics.
+It saves the metrics and the confusion matrix to a given file's path.
+'''
+
+
+def evaluate_tree(tree, verification_data, global_class_distribution,
+                  file_path):
+
+    classification = Classifier.classify_dataset_tree(tree, verification_data)
+    generate_evaluation_data(classification, verification_data.classes,
+                             verification_data.dataset,
+                             len(verification_data.dataset), file_path)
 
 
 if __name__ == '__main__':
