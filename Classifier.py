@@ -70,7 +70,6 @@ def classify(tree, instance, distribution):
 # returns the list of classified instances by tree
 def classify_dataset_tree(tree, data):
     result_list = []
-    new_id = 0
     # classify instances
     for instance in data.dataset:
         result_node_tag = classify(tree, instance, 
