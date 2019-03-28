@@ -116,11 +116,13 @@ def generate_forest_classifier(data):
 
 
 # classifies a multi-label dataset and returns the generated labels for it
-def classify_dataset_multi_label(classifier, dataset):
+def classify_dataset_multi_label(classifier, data):
     labels = []
-    for entry in dataset:
-        label = classify_multi_label(classifier, entry)
-        labels.append(label)
+    for entry in data.dataset:
+        guess = classify_multi_label(classifier, entry)
+        guessed_label = data.classes[guess]
+        label = entry[-1]
+        labels.append([guessed_label, label])
     return labels
 
 
@@ -135,8 +137,8 @@ def classify_multi_label(classifier, entry):
         class_value = int(re.findall(r'Class (\d)+', classify_result)[0])
         tags.append([count, class_value, instances_count])
         count += 1
-    label = tags[process_tags(tags)[0]][0]
-    return label
+    guess = tags[process_tags(tags)[0]][0]
+    return guess
 
 
 # returns the tag index of which tag of the
@@ -191,8 +193,14 @@ if __name__ == "__main__":
     for instance in list_of_classified_instances:
         print(instance)
 '''
-    data = Data.Data('iris')
+    data = Data.Data('covtype')
     (data_training, data_validation) = data.divide_corpus(0.8)
-    classifier = ID3.ID3(data_training)
-    tags = classify_dataset_tree(classifier[0], data_validation)
+    classifier = generate_forest_classifier(data_training)
+    tags = classify_dataset_multi_label(classifier, data_validation)
     print(tags)
+
+    success = 0
+    for elem in tags:
+        success += (1 if elem[0] == elem[1] else 0)
+    success_rate = success/len(tags)
+    print(success_rate)
