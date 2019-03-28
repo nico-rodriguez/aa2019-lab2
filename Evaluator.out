@@ -1,57 +1,75 @@
 Confusion Matrix
                     Actual class
                      Iris-setosa Iris-versicolor  Iris-virginica
-     Iris-setosa              11               0               0
- Iris-versicolor               0               6               1
-  Iris-virginica               0               3               9
+     Iris-setosa               3               2               0
+ Iris-versicolor               2               9               1
+  Iris-virginica               2               1              10
 
-              11               0               0
-               0               6               1
-               0               3               9
+               3               2               0
+               2               9               1
+               2               1              10
+
+Metrics for a given class
+True Positives
+False Positives
+False Negatives
+True Negatives
+Precision
+Recall
+Fall-out
+F-Measure
 
 Metrics for class Iris-setosa classification
-True Positives = 11
-False Positives = 0
-False Negatives = 0
-True Negatives = 19
-Precision = 1.0
-Recall = 1.0
-Fall-out = 0.0
-F-Measure = 1.0
+3
+2
+4
+21
+0.6
+0.42857142857142855
+0.08695652173913043
+2.0
 
 
 Metrics for class Iris-versicolor classification
-True Positives = 6
-False Positives = 1
-False Negatives = 3
-True Negatives = 20
-Precision = 0.8571428571428571
-Recall = 0.6666666666666666
-Fall-out = 0.047619047619047616
-F-Measure = 1.3333333333333335
+9
+3
+3
+15
+0.75
+0.75
+0.16666666666666666
+1.3333333333333333
 
 
 Metrics for class Iris-virginica classification
-True Positives = 9
-False Positives = 3
-False Negatives = 1
-True Negatives = 17
-Precision = 0.75
-Recall = 0.9
-Fall-out = 0.15
-F-Measure = 1.2222222222222223
+10
+3
+1
+16
+0.7692307692307693
+0.9090909090909091
+0.15789473684210525
+1.2
 
 
 Macro measures
-Precision = 0.8690476190476191
-Recall = 0.8555555555555555
-Fall-out = 0.06587301587301587
-F-Measure = 1.1851851851851853
+Precision
+Recall
+Fall-out
+F-Measure
+0.7064102564102565
+0.6958874458874459
+0.1371726417493008
+1.511111111111111
 
 
 Micro measures
-Precision = 0.8738095238095238
-Recall = 0.8666666666666667
-Fall-out = 0.0642857142857143
-F-Measure = 1.174074074074074
+Precision
+Recall
+Fall-out
+F-Measure
+0.7220512820512821
+0.7333333333333333
+0.14485125858123568
+1.4400000000000002
 

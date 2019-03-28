@@ -72,20 +72,32 @@ def evaluate_classificator(classification, classes,
             output.write('\n')
 
         output.write('\n')
+
+        output.write('Metrics for a given class\n')
+        output.write('True Positives\n')
+        output.write('False Positives\n')
+        output.write('False Negatives\n')
+        output.write('True Negatives\n')
+        output.write('Precision\n')
+        output.write('Recall\n')
+        output.write('Fall-out\n')
+        output.write('F-Measure\n')
+
+        output.write('\n')
         for c in classes:
             output.write('Metrics for class {c} classification\n'.format(c=c))
 
             true_positives = confusion_matrix[c][c]
-            output.write('True Positives = {val}\n'.format(val=true_positives))
+            output.write('{val}\n'.format(val=true_positives))
 
             false_positives, false_negatives = 0, 0
             for c2 in classes:
                 if c != c2:
                     false_positives += confusion_matrix[c][c2]
                     false_negatives += confusion_matrix[c2][c]
-            output.write('False Positives = {val}\n'.format(
+            output.write('{val}\n'.format(
                 val=false_positives))
-            output.write('False Negatives = {val}\n'.format(
+            output.write('{val}\n'.format(
                 val=false_negatives))
 
             true_negatives = 0
@@ -93,19 +105,19 @@ def evaluate_classificator(classification, classes,
                 for c2 in classes:
                     if c1 != c and c2 != c:
                         true_negatives += confusion_matrix[c1][c2]
-            output.write('True Negatives = {val}\n'.format(val=true_negatives))
+            output.write('{val}\n'.format(val=true_negatives))
 
             precision = true_positives/(true_positives+false_positives)
-            output.write('Precision = {val}\n'.format(val=precision))
+            output.write('{val}\n'.format(val=precision))
 
             recall = true_positives/(true_positives+false_negatives)
-            output.write('Recall = {val}\n'.format(val=recall))
+            output.write('{val}\n'.format(val=recall))
 
             fall_out = false_positives/(false_positives+true_negatives)
-            output.write('Fall-out = {val}\n'.format(val=fall_out))
+            output.write('{val}\n'.format(val=fall_out))
 
             f_measure = (0.5/precision) + (0.5/recall)
-            output.write('F-Measure = {val}\n'.format(val=f_measure))
+            output.write('{val}\n'.format(val=f_measure))
 
             precision_macro += precision
             recall_macro += recall
@@ -132,18 +144,26 @@ def evaluate_classificator(classification, classes,
         f_measure_micro /= instances_number
 
         output.write('Macro measures\n')
-        output.write('Precision = {val}\n'.format(val=precision_macro))
-        output.write('Recall = {val}\n'.format(val=recall_macro))
-        output.write('Fall-out = {val}\n'.format(val=fall_out_macro))
-        output.write('F-Measure = {val}\n'.format(val=f_measure_macro))
+        output.write('Precision\n')
+        output.write('Recall\n')
+        output.write('Fall-out\n')
+        output.write('F-Measure\n')
+        output.write('{val}\n'.format(val=precision_macro))
+        output.write('{val}\n'.format(val=recall_macro))
+        output.write('{val}\n'.format(val=fall_out_macro))
+        output.write('{val}\n'.format(val=f_measure_macro))
 
         output.write('\n\n')
 
         output.write('Micro measures\n')
-        output.write('Precision = {val}\n'.format(val=precision_micro))
-        output.write('Recall = {val}\n'.format(val=recall_micro))
-        output.write('Fall-out = {val}\n'.format(val=fall_out_micro))
-        output.write('F-Measure = {val}\n'.format(val=f_measure_micro))
+        output.write('Precision\n')
+        output.write('Recall\n')
+        output.write('Fall-out\n')
+        output.write('F-Measure\n')
+        output.write('{val}\n'.format(val=precision_micro))
+        output.write('{val}\n'.format(val=recall_micro))
+        output.write('{val}\n'.format(val=fall_out_micro))
+        output.write('{val}\n'.format(val=f_measure_micro))
 
         output.write('\n')
 
