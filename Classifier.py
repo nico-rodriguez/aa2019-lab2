@@ -89,8 +89,8 @@ def generate_forest_classifier(data):
                                        0: 1-label_distribution}
         new_data.global_class_distribution = {1: label_distribution,
                                               0: 1-label_distribution}
-        idtree = ID3.ID3(new_data)[0]
-        IDtrees.append((idtree, new_data.class_distribution))
+        idtree_result = ID3.ID3(new_data)
+        IDtrees.append((idtree_result[0], idtree_result[1], new_data.class_distribution))
     return IDtrees
 
 
