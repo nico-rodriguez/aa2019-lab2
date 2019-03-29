@@ -17,11 +17,12 @@ breakpoints_file_name = 'breakpoints.txt'
 evaluation_file_name = 'evaluation.txt'
 
 if __name__ == '__main__':
-    uso = """
+    uso_general = """
         Hay dos modos de uso: Entrenar y Evaluar. El primero genera el clasificador y separa las instancias
         para entrenamiento y para verificación; el segundo evalúa un clasificador generado previamente con
-        el modo Entrenar.
-
+        el modo Entrenar.\n
+    """
+    uso_entrenar = """
         Para Entrenar invocar como
 
         python3 Main.py Entrenar [iris|covtype] [Single|Forest] [training] [directorio]
@@ -36,8 +37,9 @@ if __name__ == '__main__':
         un número entre 0 y 1 (e.g. 0.8).
         - directorio es el nombre del directorio en donde se van a guardar el clasificador
         y los archivos de instancias (se guardan las de entrenamiento y verificación en dos
-        archivos diferentes). No debe existir otro directorio con el mismo nombre.
-
+        archivos diferentes). No debe existir otro directorio con el mismo nombre.\n
+    """
+    uso_evaluar = """
         Para Evaluar invocar como:
 
         python3 Main.py Evaluar [iris|covtype] [directorio] [salida]
@@ -53,28 +55,28 @@ if __name__ == '__main__':
     if mode == 'Entrenar':
         if len(sys.argv) != 6:
             print('Error. Número incorrecto de parámetros.\n')
-            print(uso)
+            print(uso_entrenar)
             exit()
         dataset_name = sys.argv[2]
         if dataset_name not in ['iris', 'covtype']:
             print('Error. Nombre de dataset incorrecto. Solo puede ser "iris" o "covtype"\n')
-            print(uso)
+            print(uso_entrenar)
             exit()
         classifier_type = sys.argv[3]
         if classifier_type not in ['Single', 'Forest']:
             print('Error. Tipo de clasificador incorrecto. Solo puede ser "Single" o "Forest"\n')
-            print(uso)
+            print(uso_entrenar)
             exit()
-        training_percentage = int(sys.argv[4])
+        training_percentage = float(sys.argv[4])
         if training_percentage <= 0 or training_percentage >= 1:
             print('Error. Valor de proporción de instancias de entrenamiento' +
                   ' incorrecto. Solo puede ser un numero entre 0 y 1 (e.g. 0.8)\n')
-            print(uso)
+            print(uso_entrenar)
             exit()
         directory = sys.argv[5]
         if os.path.isdir(directory):
             print('Error. Ya existe el directorio especificado. Especificar uno nuevo.\n')
-            print(uso)
+            print(uso_entrenar)
             exit()
 
         # Create directory for saving the results
@@ -118,19 +120,19 @@ if __name__ == '__main__':
             print('Main.py: Exception, impossible case.\n')
 
     elif mode == 'Evaluar':
-        if len(sys.argv) != 4:
+        if len(sys.argv) != 5:
             print('Error. Número incorrecto de parámetros.\n')
-            print(uso)
+            print(uso_evaluar)
             exit()
         dataset_name = sys.argv[2]
         if dataset_name not in ['iris', 'covtype']:
             print('Error. Nombre de dataset incorrecto. Solo puede ser "iris" o "covtype"\n')
-            print(uso)
+            print(uso_evaluar)
             exit()
         directory = sys.argv[3]
         if not os.path.isdir(directory):
             print('Error. No existe el directorio especificado. Especificar un directorio que haya sido creado con el modo Entrenar.\n')
-            print(uso)
+            print(uso_evaluar)
             exit()
 
         # Load validation data
@@ -142,11 +144,11 @@ if __name__ == '__main__':
         # Walk through the tree files inside the directory
         for root, dirs, files in os.walk(directory):
             # Load the tree(s) from the files "classifier0.json", "classifier1.json", etc.
-            for i in range(data.amount_classes):
+            for i in range(data_validation.amount_classes):
                 tree_file_name = classifier_file_name_prefix + str(i) + '.json'
                 if tree_file_name in files:
                     print('Loading tree file {file}'.format(file=tree_file_name))
-                    trees.append(ID3.load_tree(tree_file_name))
+                    trees.append(ID3.load_tree(directory + '/' + tree_file_name))
                 else:
                     break
 
@@ -172,5 +174,5 @@ if __name__ == '__main__':
 
     else:
         print('Error. Modo de uso inválido. Los posibles modos de uso son Entrenar y Evaluar\n')
-        print(uso)
+        print(uso_general + uso_entrenar + uso_evaluar)
         exit()
