@@ -69,10 +69,21 @@ def map_dataset(dataset, label):
 
 
 '''
+Receives a data and classifies the associated dataset using random distribution,
+returning a list of pairs [label, guess]
+'''
+
+def classify_dataset_random(data):
+    result = []
+    for elem in data.dataset:
+        random_guess = (random.sample(data.classes, 1))
+        result.append(elem[-1], random_guess)
+    return result
+
+'''
 Receives data with 80 percent of the dataset for training.
 Returns array with n classification trees where n is the amount of classes.
 '''
-
 
 def generate_forest_classifier(data):
     IDtrees = []
@@ -110,7 +121,7 @@ def classify_multi_label(classifier, entry):
     tags = []
     count = 0
     for tree in classifier:
-        classify_result = classify(tree[0], entry, tree[1])
+        classify_result = classify(tree[0], entry, tree[2])
         instances_count = float(re.findall(r'Instances (\d+\.\d)+',
                                 classify_result)[0])
         class_value = int(re.findall(r'Class (\d)+', classify_result)[0])
@@ -166,7 +177,6 @@ def generate_classifier(type, training_proportion, dataset, directory):
         data = Data.Data('iris')
         data_training, data_validation = data.divide_corpus(
             training_proportion)
-
 
 if __name__ == "__main__":
     '''
