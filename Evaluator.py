@@ -175,11 +175,13 @@ def evaluate_classificator(classification, classes,
 if __name__ == '__main__':
     data = Data.Data('iris')
     (data_training, data_validation) = data.divide_corpus(0.8)
-    classifier, breakpoints = ID3.ID3(data_training)
-    data_validation.apply_breakpoints(breakpoints)
-    classification = Classifier.classify_dataset_tree(classifier,
-                                                      data_validation)
-
+    classifier = Classifier.generate_forest_classifier(data_training)
+    modified_data_validations = []
+    for elem in classifier:
+        new_validation_data = data_validation.copy()
+        new_validation_data.apply_breakpoints(elem[1])
+        modified_data_validations.append(new_validation_data)
+    classification = Classifier.classify_dataset_multi_label(classifier, modified_data_validations)
     evaluate_classificator(classification, data_validation.classes,
                            data_validation.dataset,
                            len(data_validation.dataset), 'Evaluator.out')
