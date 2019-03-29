@@ -119,15 +119,6 @@ class Data:
             if best_profit is None or new_profit > best_profit:
                 best_profit = new_profit
                 best_cutting_value = self.dataset[i][attribute]
-        '''
-        for instance in self.dataset:
-            new_profit = Utils.profit(
-                self.dataset, attribute, [instance[attribute]], self.classes)
-            if best_profit is None or new_profit > best_profit:
-                best_profit = new_profit
-                best_cutting_value = instance[attribute]
-        '''
-
         return best_cutting_value
     '''
     Project the instances across attribute, returning a list with instances of
@@ -202,9 +193,11 @@ class Data:
     '''
     def recalculate_distributions(self):
         new_distribution = {}
+        for c in self.classes:
+            new_distribution[c] = 0
         for instance in self.dataset:
             new_distribution[instance[-1]] += 1
-        for value in new_distribution.values:
+        for value in new_distribution.values():
             value /= len(self.dataset)
         self.global_class_distribution = new_distribution
         self.class_distribution = new_distribution
@@ -270,7 +263,7 @@ class Data:
     def save_data(self, file_path):
         with open(file_path, 'w') as save_file:
             for instance in self.dataset:
-                save_file.write(str(instance))
+                save_file.write(str(instance) + '\n')
 
 
 '''
@@ -292,18 +285,5 @@ def load_data(dataset_name, file_path):
 
 if __name__ == '__main__':
 
-    data = Data('iris')
-    print(data.project_attribute(data.attributes[0]))
-
-    '''
-    split_data = data.split_attribute(
-        0, data.best_cutting_value(0)).project_attribute(0)
-    with open('test.txt', 'w') as test_file:
-        for instance in split_data[0].dataset:
-            test_file.write(str(instance) + '\n')
-        test_file.write('\n\n')
-        for instance in split_data[1].dataset:
-            test_file.write(str(instance) + '\n')
-    data2 = Data('covtype')
-    print(data2.dataset[0:20])
-    '''
+    data_iris = Data('iris')
+    print(data_iris.project_attribute(data_iris.attributes[0]))

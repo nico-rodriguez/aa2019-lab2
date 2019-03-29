@@ -25,6 +25,11 @@ import Data
 
 # Saves the tree in treelib format into target_file in json format
 def save_tree(tree, target_file):
+    # Process the tags of the nodes for loading the tree later
+    # Each node's tag will be saved as tag + id
+    nodes = tree.all_nodes()
+    for node in nodes:
+        node.tag = node.tag + ',' + node.identifier
     json_str = tree.to_json(with_data=True)
     # Process json_str to a propper json format for load_tree
     json_str = json_str.replace("\\", "")
@@ -37,23 +42,41 @@ def __dictionary_to_tree(dictionary):
     if dictionary != {}:
         tree = Tree()
         root = list(dictionary.keys())[0]
+        # Split node tag from node id
+        node_tag = root.split(',')[0]
+        node_id = ','.join(root.split(',')[1:])
+        parent_id = ','.join(root.split(',')[1:-2]) + ','
+        if parent_id == ',':
+            parent_id = None
+        print(root)
+        print(node_tag)
+        print(node_id)
+        print(parent_id)
         if 'data' in list(dictionary[root].keys()):
-            tree.create_node(root, root, data=dictionary[root]['data'])
+            tree.create_node(node_tag, node_id, data=dictionary[root]['data'])
         else:
-            tree.create_node(root, root)
+            tree.create_node(node_tag, node_id)
         for children_dict in dictionary[root]["children"]:
             children_name = list(children_dict.keys())[0]
             children_key_list = list(children_dict[children_name].keys())
+            # Split node tag from node id
+            child_node_tag = ','.join(children_name.split(',')[0:2])
+            child_node_id = ','.join(children_name.split(',')[2:])
+            child_parent_id = ','.join(children_name.split(',')[2:-2]) + ','
+            print(children_name)
+            print(child_node_tag)
+            print(child_node_id)
+            print(child_parent_id)
             # Node is a leaf
             if 'children' not in children_key_list:
                 if 'data' in children_key_list:
-                    tree.create_node(children_name, children_name, parent=root,
+                    tree.create_node(child_node_tag, child_node_id, parent=node_id,
                                      data=children_dict[children_name]['data'])
                 else:
-                    tree.create_node(children_name, children_name, parent=root)
+                    tree.create_node(child_node_tag, child_node_id, parent=node_id)
             # Node is not leaf
             else:
-                tree.paste(root, __dictionary_to_tree(children_dict))
+                tree.paste(child_node_id, __dictionary_to_tree(children_dict))
         return tree
     else:
         return Tree()
