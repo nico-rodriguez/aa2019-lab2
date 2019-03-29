@@ -25,12 +25,10 @@ class Data:
     to some cutting point, and 1 for the rest.
     '''
     def __init__(self, data_name):
-        #print('Creating Data class instance')
         self.data_name = data_name
         # Indicates if all instances belong to the same class
         self.monoclass_instances = None
         if (data_name == "iris"):
-            #print('Iris data selected')
             self.amount_attributes = 4
             self.attributes = [0, 1, 2, 3]
             self.attribute_values = {
@@ -44,7 +42,6 @@ class Data:
             self.global_class_distribution = {
                 'Iris-setosa': 1/3, 'Iris-versicolor': 1/3,
                 'Iris-virginica': 1/3}
-            #print('Beginning iris data loading into Data instance')
             with open(iris_processed_data, 'r') as instance_file:
                 instances_list = instance_file.readlines()
                 self.dataset = []
@@ -53,7 +50,6 @@ class Data:
                     instance_as_list = ast.literal_eval(line)
                     self.dataset.append(instance_as_list)
         else:
-            #print('Covtype data selected')
             self.amount_attributes = 12
             self.attributes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
             self.attribute_values = {
@@ -73,7 +69,6 @@ class Data:
                 3: 2747/581012, 4: 9493/581012, 5: 17367/581012,
                 6: 20510/581012
             }
-            #print('Beginning covtype data loading into Data instance')
             with open(covtype_processed_data, 'r') as instance_file:
                 instances_list = instance_file.readlines()
                 self.dataset = []
@@ -214,7 +209,6 @@ class Data:
         self.global_class_distribution = new_distribution
         self.class_distribution = new_distribution
 
-
     '''
     creates both validation and training sets from data
     percentage takes values from 0 and 1
@@ -249,7 +243,7 @@ class Data:
         data_validation.classes = self.classes.copy()
         data_validation.class_distribution = self.class_distribution.copy()
         return (data_training, data_validation)
-    
+
     def apply_breakpoints(self, breakpoints):
         for attribute in breakpoints.keys():
             for data in self.dataset:
@@ -269,6 +263,31 @@ class Data:
         data.classes = self.classes.copy()
         data.class_distribution = self.class_distribution.copy()
         return data
+
+    '''
+    Saves the instances to the given file_path.
+    '''
+    def save_data(self, file_path):
+        with open(file_path, 'w') as save_file:
+            for instance in self.dataset:
+                save_file.write(str(instance))
+
+
+'''
+Loads the instances from the given file_path of the corresponding dataset.
+Returns an instance of Data.
+'''
+
+
+def load_data(dataset_name, file_path):
+    data = Data(dataset_name)
+    data.dataset = []
+    with open(file_path, 'r') as instances_file:
+        instances_lines = instances_file.readlines()
+        for instance_line in instances_lines:
+            data.dataset.append(ast.literal_eval(instance_line))
+    data.recalculate_distributions()
+    return data
 
 
 if __name__ == '__main__':

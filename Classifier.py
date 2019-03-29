@@ -11,39 +11,10 @@ import Data
 import Utils
 import random
 import re
+import os
 
 
-# devides data.dataset into two data sets, the first which is
-# k-1 pieces and the latter which consists of only one piece.
-# returns the lists of pairs (training, validation) subsets
-def k_fold_cross_validation(data, k):
-    k_partition_len = len(data.dataset)/k
-    dataset_aux = data.dataset.copy()
-    dataset_training_aux = data.dataset.copy()
-    k_division_list = []
-    aux_list = []
-    result_list = []
-    # the k partitions are cerated to ensure no element is used more than once
-    # in each of the iterations
-    for i in range(0, k):
-        for i in range(0, k_partition_len):
-            data_index = random.randint(0, len(dataset_aux))
-            aux_list.append(dataset_aux[data_index])
-            del dataset_aux[data_index]  # we remove it to avoid duplicates
-            # an element in the validation set isnt in the training set for
-            # this iteration
-            del dataset_training_aux[data_index]
-        k_division_list.append(aux_list)
-        # the k division list is used as this iterations validation set
-        result_list.append((dataset_training_aux, aux_list.copy()))
-        # reset relevant structures
-        dataset_training_aux = data.dataset.copy()
-        aux_list = []
-        k_division_list = []
-    return result_list
-
-
-# returns the class of the instance according to tree
+# Returns the class of the instance according to the tree.
 def classify(tree, instance, distribution):
     # first node is fetched by hand
     current_path = "Attribute None = None,"
@@ -66,8 +37,12 @@ def classify(tree, instance, distribution):
     return current_node.tag
 
 
-# Takes in a tree and a set of instances to be evaluated
-# returns a list of tples classified instances by tree
+'''
+Takes a tree and a set of instances to be evaluated and
+returns a list of tuples (true_class, classified_class)
+'''
+
+
 def classify_dataset_tree(tree, data):
     result_list = []
     # classify instances
@@ -93,8 +68,12 @@ def map_dataset(dataset, label):
     return new_dataset
 
 
-# receives data with 80 percent of the data.dataset for training
-# returns array with n classification trees where n is the amount of classes
+'''
+Receives data with 80 percent of the dataset for training.
+Returns array with n classification trees where n is the amount of classes.
+'''
+
+
 def generate_forest_classifier(data):
     IDtrees = []
     for class_label in data.classes:
@@ -115,18 +94,18 @@ def generate_forest_classifier(data):
     return IDtrees
 
 
-# classifies a multi-label dataset and returns the generated labels for it
+# Classifies a multi-label dataset and returns the generated labels for it
 def classify_dataset_multi_label(classifier, data):
     labels = []
     for entry in data.dataset:
         guess = classify_multi_label(classifier, entry)
         guessed_label = data.classes[guess]
         label = entry[-1]
-        labels.append([guessed_label, label])
+        labels.append([label, guessed_label])
     return labels
 
 
-# classifies an entry using the multi-label classifier classifier
+# Classifies an entry using the multi-label classifier
 def classify_multi_label(classifier, entry):
     tags = []
     count = 0
@@ -141,8 +120,12 @@ def classify_multi_label(classifier, entry):
     return guess
 
 
-# returns the tag index of which tag of the
-# the tree wins (which one is chosen for the input)
+'''
+Returns the tag index of which tag of the
+the tree wins (which one is chosen for the input)
+'''
+
+
 def process_tags(tags):
 
     def filter_func(elem):
@@ -166,16 +149,25 @@ def process_tags(tags):
     return (random.sample(max_tags, 1))[0]
 
 
-# receives a list of indexes and a list of classes and returns a list of
-# classes associated with each tag
-def map_to_tag(indexes, classes):
-    tags = []
-    for index in indexes:
-        tags.append(classes[index])
-    return tags
+'''
+Receives a classifier's type ("Single" or "Forest"), a training_proportion
+(e.g. 0.8), a dataset name ("iris" or "covtype") and a directory path.
+Generates the classifier and saves it in the specified directory, toghether
+with the training instances and the verification instances split in two files.
+'''
 
 
-# receives 3 trained trees
+def generate_classifier(type, training_proportion, dataset, directory):
+    os.mkdir(directory)
+    print("Se crea el directorio {dir}".format(dir=directory))
+
+    if dataset == 'iris':
+        print('Iris dataset seleccionado')
+        data = Data.Data('iris')
+        data_training, data_validation = data.divide_corpus(
+            training_proportion)
+
+
 if __name__ == "__main__":
     '''
     data = Data.Data('iris')
@@ -198,9 +190,3 @@ if __name__ == "__main__":
     classifier = generate_forest_classifier(data_training)
     tags = classify_dataset_multi_label(classifier, data_validation)
     print(tags)
-
-    success = 0
-    for elem in tags:
-        success += (1 if elem[0] == elem[1] else 0)
-    success_rate = success/len(tags)
-    print(success_rate)

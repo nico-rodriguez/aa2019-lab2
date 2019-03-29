@@ -15,12 +15,12 @@ This function evaluates a given classifier's metrics: true positives,
 true negatives, false positives, false negatives, precision, recall, fall-out
 and F-measure.
 It saves the metrics and the confusion matrix to a given file's path.
-- classification is a list of tuples (true_class, classified_class).
-- classes is a list with all the possible class labels.
-- instances is a list of instances (a list of lists) corresponding to the
+- 'classification' is a list of tuples (true_class, classified_class).
+- 'classes' is a list with all the possible class labels.
+- 'instances' is a list of instances (a list of lists) corresponding to the
 verification instances.
-- instances_number is the number of instances in 'instances'.
-- file_path is the route to the file for saving the evaluation metrics.
+- 'instances_number' is the number of instances in 'instances'.
+- 'file_path' is the route to the file for saving the evaluation metrics.
 '''
 
 
@@ -28,7 +28,7 @@ def evaluate_classificator(classification, classes,
                            instances, instances_number,
                            file_path):
     '''
-    Dictionary of dictionaries. confusion_matrix[class] has a dictionary
+    Dictionary of dictionaries: confusion_matrix[class] has a dictionary
     with the instance number of each class.
     confusion_matrix[class_i][class_j] is the number of instances from
     class_i classified as class_j.
