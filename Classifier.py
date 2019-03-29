@@ -106,23 +106,29 @@ def generate_forest_classifier(data):
 
 
 # Classifies a multi-label dataset and returns the generated labels for it
-def classify_dataset_multi_label(classifier, data):
+def classify_dataset_multi_label(classifier, multiple_data):
     labels = []
-    for entry in data.dataset:
-        guess = classify_multi_label(classifier, entry)
-        guessed_label = data.classes[guess]
-        label = entry[-1]
-        labels.append([label, guessed_label])
+    for index in range(len(multiple_data[0].dataset)):
+        entries = []
+        for d in range(len(multiple_data)):
+            entries.append(multiple_data[d].dataset[index])
+        guess = classify_multi_label(classifier, entries)
+        guess_label = multiple_data[d].classes[guess]
+        label = (multiple_data[0].dataset[index])[-1]
+        labels.append([label, guess_label])
+        print([label, guess_label])
     return labels
 
 
 # Classifies an entry using the multi-label classifier
-def classify_multi_label(classifier, entry):
+def classify_multi_label(classifier, entries):
     tags = []
     count = 0
-    for tree in classifier:
+    for i in range(len(classifier)):
+        tree = classifier[i]
+        entry = entries[i]
         classify_result = classify(tree[0], entry, tree[2])
-        instances_count = float(re.findall(r'Instances (\d+\.\d)+',
+        instances_count = float(re.findall(r'Instances (\d+)',
                                 classify_result)[0])
         class_value = int(re.findall(r'Class (\d)+', classify_result)[0])
         tags.append([count, class_value, instances_count])
