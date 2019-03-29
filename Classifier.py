@@ -77,7 +77,7 @@ def classify_dataset_random(data):
     result = []
     for elem in data.dataset:
         random_guess = (random.sample(data.classes, 1))
-        result.append(elem[-1], random_guess)
+        result.append([elem[-1], random_guess])
     return result
 
 '''
