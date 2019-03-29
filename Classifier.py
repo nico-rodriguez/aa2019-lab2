@@ -116,7 +116,6 @@ def classify_dataset_multi_label(classifier, multiple_data):
         guess_label = multiple_data[d].classes[guess]
         label = (multiple_data[0].dataset[index])[-1]
         labels.append([label, guess_label])
-        print([label, guess_label])
     return labels
 
 
