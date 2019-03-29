@@ -2,6 +2,7 @@
 Main module of the project.
 '''
 
+import ast
 import Classifier
 import Data
 import Evaluator
@@ -12,6 +13,8 @@ import sys
 training_file_name = 'training.txt'
 validation_file_name = 'validation.txt'
 classifier_file_name_prefix = 'classifier'
+breakpoints_file_name = 'breakpoints.txt'
+evaluation_file_name = 'evaluation.txt'
 
 if __name__ == '__main__':
     uso = """
@@ -37,16 +40,21 @@ if __name__ == '__main__':
 
         Para Evaluar invocar como:
 
-        python3 Main.py Evaluar [iris|covtype] [directorio]
+        python3 Main.py Evaluar [iris|covtype] [directorio] [salida]
 
         donde:
         - directorio es un directorio generado tal como se genera con el modo Entrenar (para que funcione
-        correctamente, no se pueden modificar los archivos de dicho directorio).\n
+        correctamente, no se pueden modificar los archivos de dicho directorio).
+        - salida es el nombre del archivo en donde se escriben las métricas de la evaluación.\n
     """
 
     # Sanitize arguments
     mode = sys.argv[1]
     if mode == 'Entrenar':
+        if len(sys.argv) != 6:
+            print('Error. Número incorrecto de parámetros.\n')
+            print(uso)
+            exit()
         dataset_name = sys.argv[2]
         if dataset_name not in ['iris', 'covtype']:
             print('Error. Nombre de dataset incorrecto. Solo puede ser "iris" o "covtype"\n')
@@ -90,10 +98,13 @@ if __name__ == '__main__':
         # Generate classifier
         print('Entrenando al clasificador\n')
         if classifier_type == 'Single':
-            tree = ID3.ID3(data_training)
+            tree, breakpoints = ID3.ID3(data_training)
             classifier_file_name = directory + '/' + classifier_file_name_prefix + '0.json'
             print('Guardando el clasificador en {file}\n'.format(file=classifier_file_name))
             ID3.save_tree(tree, classifier_file_name)
+            print('Guardando los breakpoints de los atributos con valores continuos\n')
+            with open(directory + '/' + breakpoints_file_name, 'w') as breakpoints_file:
+                breakpoints_file.write(str(breakpoints))
             exit()
         elif classifier_type == 'Forest':
             trees = Classifier.generate_forest_classifier(data_training)
@@ -107,6 +118,10 @@ if __name__ == '__main__':
             print('Main.py: Exception, impossible case.\n')
 
     elif mode == 'Evaluar':
+        if len(sys.argv) != 4:
+            print('Error. Número incorrecto de parámetros.\n')
+            print(uso)
+            exit()
         dataset_name = sys.argv[2]
         if dataset_name not in ['iris', 'covtype']:
             print('Error. Nombre de dataset incorrecto. Solo puede ser "iris" o "covtype"\n')
@@ -120,7 +135,7 @@ if __name__ == '__main__':
 
         # Load validation data
         print('Leyendo instancias para validar\n')
-        data = Data.load_data(dataset_name, directory + '/' + validation_file_name)
+        data_validation = Data.load_data(dataset_name, directory + '/' + validation_file_name)
 
         trees = []
 
@@ -130,6 +145,30 @@ if __name__ == '__main__':
             for i in range(data.amount_classes):
                 tree_file_name = classifier_file_name_prefix + str(i) + '.json'
                 if tree_file_name in files:
+                    print('Loading tree file {file}'.format(file=tree_file_name))
+                    trees.append(ID3.load_tree(tree_file_name))
+                else:
+                    break
+
+        # Evaluate the classifier on the validation data
+
+        # Single tree classifier
+        if len(trees) == 1:
+            # Load breakpoints
+            print('Cargando breakpoints generados durante el entrenamiento\n')
+            breakpoints = {}
+            with (open(directory + '/' + breakpoints_file_name)) as breakpoints_file:
+                breakpoints = ast.literal_eval(breakpoints_file.read())
+            print('Aplicando breakpoints a los atributos continuos de las instancias de validación\n')
+            data_validation.apply_breakpoints(breakpoints)
+            print('Ejecutando el clasificador sobre las instancias de validación\n')
+            classification = Classifier.classify_dataset_tree(trees[0], data_validation)
+            print('Evaluando clasificador\n')
+            print('Guardando métricas en {file}'.format(file=directory + '/' + evaluation_file_name))
+            Evaluator.evaluate_classificator(classification, data_validation.classes,
+                                             data_validation.dataset, len(data_validation.dataset),
+                                             directory + '/' + evaluation_file_name)
+            exit()
 
     else:
         print('Error. Modo de uso inválido. Los posibles modos de uso son Entrenar y Evaluar\n')
