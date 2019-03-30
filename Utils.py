@@ -4,7 +4,6 @@ Module with utility functions used in more than one module.
 
 import math
 import random
-import Data
 
 
 '''
@@ -82,17 +81,6 @@ def profit(data, index, values, classes):
         for key in proportions_of_data:
             proportions_of_data[key] /= len(data)
 
-        # For debugging
-        '''
-        print("less={num_less}".format(num_less=less))
-        print("proportions_of_data = {proportion}".format(
-            proportion=proportions_of_data))
-        print("proportions_of_less = {proportion}".format(
-            proportion=proportions_of_less))
-        print("proportions_of_greater = {proportion}".format(
-            proportion=proportions_of_greater))
-        '''
-
         # Return information gain
         return (__entropy(proportions_of_data) -
                 less/len(data) * __entropy(proportions_of_less) -
@@ -133,23 +121,18 @@ def profit(data, index, values, classes):
         # return the information gain
         profit = __entropy(proportions_of_data)
 
-        # For debugging
-        '''
-        print("proportions_of_data = {proportion}".format(
-            proportion=proportions_of_data))
-        print("list_of_proportions = {proportion}".format(
-            proportion=list_of_proportions))
-        print("instances_per_value = {proportion}".format(
-            proportion=instances_per_value))
-        print("profit = {profit}".format(profit=profit))
-        '''
-
         for value in values:
             profit -= (instances_per_value[value]/len(data) *
                        __entropy(list_of_proportions[value]))
         return profit
     else:
         return "Utils.profit: values must be non-empty"
+
+
+'''
+Given a list of values and a list of distributions for each of them,
+returns a randomly selected value following the distribution.
+'''
 
 
 def weighted_random(values, distribution):
@@ -159,38 +142,3 @@ def weighted_random(values, distribution):
         cumulative_distribution += distribution[i]
         if rand_num < cumulative_distribution:
             return values[i]
-
-
-if __name__ == '__main__':
-    data1 = [
-        [1, 1, 1, 0],
-        [2, 1, 1, 1],
-        [1, 1, 1, 0],
-        [2, 1, 1, 1],
-        [1, 1, 1, 0],
-        [2, 1, 1, 1],
-        [1, 1, 1, 0],
-        [2, 1, 1, 1]
-    ]
-    index1 = 0
-    values1 = [1]
-    classes1 = [0, 1]
-    assert profit(data1, index1, values1, classes1) == 1
-    data2 = [
-        [1, 1, 1, 0],
-        [2, 1, 1, 1],
-        [3, 1, 1, 2],
-        [1, 1, 1, 0],
-        [2, 1, 1, 1],
-        [3, 1, 1, 2],
-        [1, 1, 1, 0],
-        [2, 1, 1, 1],
-        [3, 1, 1, 2]
-    ]
-    index2 = 0
-    values2 = [1, 2, 3, 4]
-    classes2 = [0, 1, 2, 3, 4, 5]
-    assert profit(data2, index2, values2, classes2) + math.log2(1/3) < 0.00001
-
-    data = Data.Data('covtype')
-    print(profit(data.dataset, 10, data.attribute_values[10], data.classes))
