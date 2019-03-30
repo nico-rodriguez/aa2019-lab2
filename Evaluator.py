@@ -129,7 +129,7 @@ def evaluate_classificator(classification, classes,
             output.write('{val}\n'.format(val=fall_out))
 
             if precision == 0 or recall == 0:
-                f_measure = 'Inf'
+                f_measure = 0
             else:
                 f_measure = 1/((0.5/precision) + (0.5/recall))
             output.write('{val}\n'.format(val=f_measure))
@@ -137,14 +137,12 @@ def evaluate_classificator(classification, classes,
             precision_macro += precision
             recall_macro += recall
             fall_out_macro += fall_out
-            if f_measure != 'Inf':
-                f_measure_macro += f_measure
+            f_measure_macro += f_measure
 
             precision_micro += amount_instances[c]*precision
             recall_micro += amount_instances[c]*recall
             fall_out_micro += amount_instances[c]*fall_out
-            if f_measure != 'Inf':
-                f_measure_micro += amount_instances[c]*f_measure
+            f_measure_micro += amount_instances[c]*f_measure
 
             output.write('\n\n')
 
@@ -153,14 +151,12 @@ def evaluate_classificator(classification, classes,
         precision_macro /= class_number
         recall_macro /= class_number
         fall_out_macro /= class_number
-        if f_measure_macro != 'Inf':
-            f_measure_macro /= class_number
+        f_measure_macro /= class_number
 
         precision_micro /= instances_number
         recall_micro /= instances_number
         fall_out_micro /= instances_number
-        if f_measure_micro != 'Inf':
-            f_measure_micro /= instances_number
+        f_measure_micro /= instances_number
 
         output.write('Macro measures\n')
         output.write('Precision\n')
