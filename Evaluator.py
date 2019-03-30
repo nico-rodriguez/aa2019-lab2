@@ -131,7 +131,7 @@ def evaluate_classificator(classification, classes,
             if precision == 0 or recall == 0:
                 f_measure = 'Inf'
             else:
-                f_measure = (0.5/precision) + (0.5/recall)
+                f_measure = 1/((0.5/precision) + (0.5/recall))
             output.write('{val}\n'.format(val=f_measure))
 
             precision_macro += precision
