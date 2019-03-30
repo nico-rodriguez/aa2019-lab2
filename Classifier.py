@@ -69,14 +69,16 @@ def map_dataset(dataset, label):
 
 
 '''
-Receives a data and classifies the associated dataset using random distribution,
-returning a list of pairs [label, guess]
+Receives a data and classifies the associated dataset using the class distribution of the dataset.
+Returns a list of pairs [label, guess]
 '''
+
 
 def classify_dataset_random(data):
     result = []
     for elem in data.dataset:
-        random_guess = (random.sample(data.classes, 1))
+        # random_guess = (random.sample(data.classes, 1))
+        random_guess = Utils.weighted_random(data.classes, list(data.class_distribution.values()))
         result.append([elem[-1], random_guess])
     return result
 
@@ -84,6 +86,7 @@ def classify_dataset_random(data):
 Receives data with 80 percent of the dataset for training.
 Returns array with n classification trees where n is the amount of classes.
 '''
+
 
 def generate_forest_classifier(data):
     IDtrees = []
@@ -184,24 +187,10 @@ def generate_classifier(type, training_proportion, dataset, directory):
             training_proportion)
 
 if __name__ == "__main__":
-    '''
+    # data = Data.Data('iris')
+    # (data_training, data_validation) = data.divide_corpus(0.8)
+    # classifier = generate_forest_classifier(data_training)
+    # tags = classify_dataset_multi_label(classifier, data_validation)
+    # print(tags)
     data = Data.Data('iris')
-    divided_corpus = data.divide_corpus(0.80)
-    (iris_tree, breakpoints) = ID3.ID3(divided_corpus[0])
-    divided_corpus[0].apply_breakpoints(breakpoints)
-    divided_corpus[1].apply_breakpoints(breakpoints)
-    iris_tree.show(idhidden=False)
-    list_of_classified_instances = []
-    for instance in divided_corpus[1].dataset:
-        list_of_classified_instances.append((
-            classify(iris_tree, instance,
-                     divided_corpus[0].global_class_distribution),
-            instance))
-    for instance in list_of_classified_instances:
-        print(instance)
-'''
-    data = Data.Data('iris')
-    (data_training, data_validation) = data.divide_corpus(0.8)
-    classifier = generate_forest_classifier(data_training)
-    tags = classify_dataset_multi_label(classifier, data_validation)
-    print(tags)
+    print(classify_dataset_random(data))
