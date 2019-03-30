@@ -1,0 +1,75 @@
+Confusion Matrix
+                    Actual class
+                     Iris-setosa Iris-versicolor  Iris-virginica
+     Iris-setosa              19              11               7
+ Iris-versicolor               0               1               0
+  Iris-virginica               0               4               3
+
+              19              11               7
+               0               1               0
+               0               4               3
+
+Metrics for a given class
+True Positives
+False Positives
+False Negatives
+True Negatives
+Precision
+Recall
+Fall-out
+F-Measure
+
+Metrics for class Iris-setosa classification
+19
+18
+0
+8
+0.5135135135135135
+1.0
+0.6923076923076923
+1.473684210526316
+
+
+Metrics for class Iris-versicolor classification
+1
+0
+15
+29
+1.0
+0.0625
+0.0
+8.5
+
+
+Metrics for class Iris-virginica classification
+3
+4
+7
+31
+0.42857142857142855
+0.3
+0.11428571428571428
+2.8333333333333335
+
+
+Macro measures
+Precision
+Recall
+Fall-out
+F-Measure
+0.6473616473616474
+0.45416666666666666
+0.26886446886446885
+4.269005847953216
+
+
+Micro measures
+Precision
+Recall
+Fall-out
+F-Measure
+0.6676104676104676
+0.5111111111111111
+0.3177045177045177
+4.274074074074075
+

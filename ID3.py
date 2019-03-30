@@ -157,6 +157,7 @@ def __ID3(tree, data, parent_attribute, parent_attribute_value,
         return tree, cutting_values
     # The are no attributes left
     if data.amount_attributes == 0:
+        # print("--no attrributes left--") debugging
         # First consider the case where there are no examples left
         if len(data.dataset) == 0:
             # Any label is likely (check data.global_class_distribution)
@@ -172,6 +173,10 @@ def __ID3(tree, data, parent_attribute, parent_attribute_value,
         # class distribution known by the parent node
         else:
             # Use data.class_distribution to label
+            print(data.dataset)
+            print("----")
+            print(data.class_distribution.keys())
+            print(data.class_distribution.values())
             sorted_class = weighted_random(
                 data.classes, list(data.class_distribution.values()))
             tree.create_node('Class {c},Instances {inst}'.format(

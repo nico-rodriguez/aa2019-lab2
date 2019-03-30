@@ -106,13 +106,19 @@ class Data:
     def best_cutting_value(self, attribute):
         best_cutting_value = None
         best_profit = None
+        '''
         if len(self.dataset) > 4:
             random_indices = random.sample(
                 list(range(len(self.dataset))), 4)
         else:
             random_indices = list(range(len(self.dataset)))
-
-        for i in random_indices:
+        '''
+        k = int(len(self.dataset)/20)
+        if k == 0:
+            random_indexes = list(range(len(self.dataset)))
+        else:
+            random_indexes = random.sample(list(range(len(self.dataset))), int(len(self.dataset)/4))
+        for i in random_indexes:
             new_profit = Utils.profit(
                 self.dataset, attribute, [self.dataset[i][attribute]],
                 self.classes)
@@ -139,7 +145,7 @@ class Data:
             del projected_data.attribute_values[attribute]
             # Re initialize class distribution (computed later)
             for i in range(len(projected_data.class_distribution)):
-                projected_data.class_distribution[i] = 0.0
+                projected_data.class_distribution[projected_data.classes[i]] = 0.0
 
             projected_data.dataset = []
             # Add projected data to dictionary. It remains to filter the
