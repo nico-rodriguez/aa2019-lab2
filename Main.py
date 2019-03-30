@@ -20,9 +20,10 @@ evaluation_file_name = 'evaluation.txt'
 
 if __name__ == '__main__':
     uso_general = """
-        Hay dos modos de uso: Entrenar y Evaluar. El primero genera el clasificador y separa las instancias
+        Hay tres modos de uso: Entrenar, Evaluar y EvaluarAleatorio. El primero genera el clasificador y separa las instancias
         para entrenamiento y para verificación; el segundo evalúa un clasificador generado previamente con
-        el modo Entrenar.\n
+        el modo Entrenar y el tercero evalúa un clasificador aleatorio que sortea las etiquetas de clase basándose en
+        la cantidad de instancias que hay de cada clase.\n
     """
     uso_entrenar = """
         Para Entrenar invocar como
@@ -44,11 +45,21 @@ if __name__ == '__main__':
     uso_evaluar = """
         Para Evaluar invocar como:
 
-        python3 Main.py Evaluar [iris|covtype] [directorio] [salida]
+        python3 Main.py Evaluar [iris|covtype] [directorio]
 
         donde:
         - directorio es un directorio generado tal como se genera con el modo Entrenar (para que funcione
-        correctamente, no se pueden modificar los archivos de dicho directorio).
+        correctamente, no se pueden modificar los archivos de dicho directorio). Los resultados de la evaluación
+        se guardan en un archivo dentro de ese mismo directorio.\n
+    """
+    uso_evaluar_aleatorio = """
+        Para EvaluarAleatorio invocar como:
+
+        python3 Main.py EvaluarAleatorio [iris|covtype] [validation] [salida]
+
+        donde:
+        - validation es la proporción de instancias del dataset seleccionado que se van a utilizar
+        para calcular las métricas.
         - salida es el nombre del archivo en donde se escriben las métricas de la evaluación.\n
     """
 
@@ -70,9 +81,9 @@ if __name__ == '__main__':
             print(uso_entrenar)
             exit()
         training_percentage = float(sys.argv[4])
-        if training_percentage <= 0 or training_percentage >= 1:
+        if training_percentage <= 0 or training_percentage > 1:
             print('Error. Valor de proporción de instancias de entrenamiento' +
-                  ' incorrecto. Solo puede ser un numero entre 0 y 1 (e.g. 0.8)\n')
+                  ' incorrecto. Solo puede ser un numero entre 0 y 1, 1 inclusive (e.g. 0.8)\n')
             print(uso_entrenar)
             exit()
         directory = sys.argv[5]
@@ -130,7 +141,7 @@ if __name__ == '__main__':
             print('Main.py: Exception, impossible case.\n')
 
     elif mode == 'Evaluar':
-        if len(sys.argv) != 5:
+        if len(sys.argv) != 4:
             print('Error. Número incorrecto de parámetros.\n')
             print(uso_evaluar)
             exit()
@@ -202,7 +213,41 @@ if __name__ == '__main__':
                                          data_validation.dataset, len(data_validation.dataset),
                                          directory + '/' + evaluation_file_name)
         exit()
+    elif mode == 'EvaluarAleatorio':
+        if len(sys.argv) != 5:
+            print('Error. Número incorrecto de parámetros.\n')
+            print(uso_evaluar_aleatorio)
+            exit()
+        dataset_name = sys.argv[2]
+        if dataset_name not in ['iris', 'covtype']:
+            print('Error. Nombre de dataset incorrecto. Solo puede ser "iris" o "covtype"\n')
+            print(uso_evaluar_aleatorio)
+            exit()
+        validation_precentage = float(sys.argv[3])
+        if validation_precentage <= 0 or validation_precentage > 1:
+            print('Error. Valor de proporción de instancias de validación' +
+                  ' incorrecto. Solo puede ser un numero entre 0 y 1, 1 inclusive (e.g. 0.8)\n')
+            print(uso_evaluar_aleatorio)
+            exit()
+        output_file = sys.argv[4]
+        if os.path.isfile(output_file):
+            print('Error. Ya existe el archivo especificado o no es un nombre válido de archivo.\n')
+            print(uso_evaluar_aleatorio)
+            exit()
+
+        print('Leyendo conjunto de instancias\n')
+        data = Data.Data(dataset_name)
+        print('Tomando el subconjunto de validación\n')
+        _, data_validation = data.divide_corpus(1.0 - validation_precentage)
+        print('Clasificando instancias con el clasificador aleatorio\n')
+        classification = Classifier.classify_dataset_random(data_validation)
+        print('Evaluando clasficador\n')
+        print('Guardando métricas en {file}'.format(file=output_file))
+        Evaluator.evaluate_classificator(classification, data_validation.classes,
+                                         data_validation.dataset, len(data_validation.dataset),
+                                         output_file)
+        exit()
     else:
         print('Error. Modo de uso inválido. Los posibles modos de uso son Entrenar y Evaluar\n')
-        print(uso_general + uso_entrenar + uso_evaluar)
+        print(uso_general + uso_entrenar + uso_evaluar + uso_evaluar_aleatorio)
         exit()
