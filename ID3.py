@@ -20,7 +20,6 @@ import json
 from treelib import Tree
 from Utils import profit, weighted_random
 import random
-import Data
 
 
 # Saves the tree in treelib format into target_file in json format
@@ -30,18 +29,21 @@ def save_tree(tree, target_file):
     nodes = tree.all_nodes()
     for node in nodes:
         node.tag = node.tag + ',' + node.identifier
-    json_str = tree.to_json(with_data=True)
-    # Process json_str to a propper json format for load_tree
+    json_str = tree.to_json()
+    # Process json_str to a proper json format for load_tree
     json_str = json_str.replace("\\", "")
     with open(target_file, 'w') as outfile:
-        outfile.write(json_str)
+        outfile.write(str(json_str))
 
 
 # Creates a treelib recursively from a dictionary
-def __dictionary_to_tree(dictionary):
-    if dictionary != {}:
-        tree = Tree()
-        root = list(dictionary.keys())[0]
+def __dictionary_to_tree(node_info, tree):
+    print('__dictionary_to_tree')
+    print(node_info)
+    # print(list(list(node_info.values())[0].keys())[0])
+    if isinstance(node_info, dict):
+        print('is not leaf')
+        root = list(node_info.keys())[0]
         # Split node tag from node id
         node_tag = root.split(',')[0]
         node_id = ','.join(root.split(',')[1:])
@@ -52,41 +54,71 @@ def __dictionary_to_tree(dictionary):
         print(node_tag)
         print(node_id)
         print(parent_id)
-        if 'data' in list(dictionary[root].keys()):
-            tree.create_node(node_tag, node_id, data=dictionary[root]['data'])
-        else:
-            tree.create_node(node_tag, node_id)
-        for children_dict in dictionary[root]["children"]:
-            children_name = list(children_dict.keys())[0]
-            children_key_list = list(children_dict[children_name].keys())
-            # Split node tag from node id
-            child_node_tag = ','.join(children_name.split(',')[0:2])
-            child_node_id = ','.join(children_name.split(',')[2:])
-            child_parent_id = ','.join(children_name.split(',')[2:-2]) + ','
-            print(children_name)
-            print(child_node_tag)
-            print(child_node_id)
-            print(child_parent_id)
-            # Node is a leaf
-            if 'children' not in children_key_list:
-                if 'data' in children_key_list:
-                    tree.create_node(child_node_tag, child_node_id, parent=node_id,
-                                     data=children_dict[children_name]['data'])
-                else:
-                    tree.create_node(child_node_tag, child_node_id, parent=node_id)
-            # Node is not leaf
-            else:
-                tree.paste(child_node_id, __dictionary_to_tree(children_dict))
-        return tree
+        tree.create_node(node_tag, node_id, parent=parent_id)
+        for children in node_info[root]["children"]:
+            __dictionary_to_tree(children, tree)
     else:
-        return Tree()
+        # Split node tag from node id
+        print('is leaf')
+        node_name = node_info
+        node_tag = ','.join(node_name.split(',')[0:2]) + ','
+        node_id = ','.join(node_name.split(',')[2:])
+        parent_id = ','.join(node_name.split(',')[2:-2]) + ','
+        if parent_id == ',':
+            parent_id = None
+        print(node_info)
+        print(node_tag)
+        print(node_id)
+        print(parent_id)
+        tree.create_node(node_tag, node_id, parent=parent_id)
+        return tree
+    return tree
+
+
+# Creates a treelib recursively from a dictionary
+def __dictionary_to_tree_old(node_info, tree):
+    print('__dictionary_to_tree')
+    print(node_info)
+    print(list(list(node_info.values())[0].keys())[0])
+    if 'children' in list(list(node_info.values())[0].keys())[0]:
+        print('is not leaf')
+        root = list(node_info.keys())[0]
+        # Split node tag from node id
+        node_tag = root.split(',')[0]
+        node_id = ','.join(root.split(',')[1:])
+        parent_id = ','.join(root.split(',')[1:-2]) + ','
+        if parent_id == ',':
+            parent_id = None
+        print(root)
+        print(node_tag)
+        print(node_id)
+        print(parent_id)
+        tree.create_node(node_tag, node_id, parent=parent_id)
+        for children in node_info[root]["children"]:
+            __dictionary_to_tree(children, tree)
+    else:
+        # Split node tag from node id
+        print('is leaf')
+        node_name = list(node_info.keys())[0]
+        node_tag = ','.join(node_name.split(',')[0:2]) + ','
+        node_id = ','.join(node_name.split(',')[2:])
+        parent_id = ','.join(node_name.split(',')[2:-2]) + ','
+        if parent_id == ',':
+            parent_id = None
+        print(node_info)
+        print(node_tag)
+        print(node_id)
+        print(parent_id)
+        tree.create_node(node_tag, node_id, parent=parent_id)
+        return tree
+    return tree
 
 
 # reads a json file and returns a treelib tree
 def load_tree(target_file):
     with open(target_file, 'r') as infile:
         dictionary = json.load(infile)
-    return __dictionary_to_tree(dictionary)
+    return __dictionary_to_tree(dictionary, Tree())
 
 
 '''
@@ -228,16 +260,3 @@ def __ID3(tree, data, parent_attribute, parent_attribute_value,
     # Exception
     else:
         return "ID3.__ID3: data.amount_attributes can't be negative."
-
-
-if __name__ == "__main__":
-
-    data = Data.Data('iris')
-    tree, cuts = ID3(data)
-    tree.show(idhidden=False)
-    print(cuts)
-    '''
-    data2 = Data.Data('covtype')
-    tree2 = ID3(data2)
-    tree2.show(idhidden=False)
-    '''

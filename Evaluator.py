@@ -7,7 +7,6 @@ over a given preprocessed data set.
 
 import Classifier
 import Data
-import ID3
 
 
 '''
@@ -111,27 +110,41 @@ def evaluate_classificator(classification, classes,
                         true_negatives += confusion_matrix[c1][c2]
             output.write('{val}\n'.format(val=true_negatives))
 
-            precision = true_positives/(true_positives+false_positives)
+            if true_positives == 0:
+                precision = 0.0
+            else:
+                precision = true_positives/(true_positives+false_positives)
             output.write('{val}\n'.format(val=precision))
 
-            recall = true_positives/(true_positives+false_negatives)
+            if true_positives == 0:
+                recall = 0.0
+            else:
+                recall = true_positives/(true_positives+false_negatives)
             output.write('{val}\n'.format(val=recall))
 
-            fall_out = false_positives/(false_positives+true_negatives)
+            if false_positives == 0:
+                fall_out = 0.0
+            else:
+                fall_out = false_positives/(false_positives+true_negatives)
             output.write('{val}\n'.format(val=fall_out))
 
-            f_measure = (0.5/precision) + (0.5/recall)
+            if precision == 0 or recall == 0:
+                f_measure = 'Inf'
+            else:
+                f_measure = (0.5/precision) + (0.5/recall)
             output.write('{val}\n'.format(val=f_measure))
 
             precision_macro += precision
             recall_macro += recall
             fall_out_macro += fall_out
-            f_measure_macro += f_measure
+            if f_measure != 'Inf':
+                f_measure_macro += f_measure
 
             precision_micro += amount_instances[c]*precision
             recall_micro += amount_instances[c]*recall
             fall_out_micro += amount_instances[c]*fall_out
-            f_measure_micro += amount_instances[c]*f_measure
+            if f_measure != 'Inf':
+                f_measure_micro += amount_instances[c]*f_measure
 
             output.write('\n\n')
 
@@ -140,12 +153,14 @@ def evaluate_classificator(classification, classes,
         precision_macro /= class_number
         recall_macro /= class_number
         fall_out_macro /= class_number
-        f_measure_macro /= class_number
+        if f_measure_macro != 'Inf':
+            f_measure_macro /= class_number
 
         precision_micro /= instances_number
         recall_micro /= instances_number
         fall_out_micro /= instances_number
-        f_measure_micro /= instances_number
+        if f_measure_micro != 'Inf':
+            f_measure_micro /= instances_number
 
         output.write('Macro measures\n')
         output.write('Precision\n')

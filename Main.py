@@ -4,6 +4,7 @@ Main module of the project.
 
 import ast
 import Classifier
+import copy
 import Data
 import Evaluator
 import ID3
@@ -13,7 +14,8 @@ import sys
 training_file_name = 'training.txt'
 validation_file_name = 'validation.txt'
 classifier_file_name_prefix = 'classifier'
-breakpoints_file_name = 'breakpoints.txt'
+breakpoints_file_name_prefix = 'breakpoints'
+distribution_file_name_prefix = 'distribution'
 evaluation_file_name = 'evaluation.txt'
 
 if __name__ == '__main__':
@@ -105,7 +107,7 @@ if __name__ == '__main__':
             print('Guardando el clasificador en {file}\n'.format(file=classifier_file_name))
             ID3.save_tree(tree, classifier_file_name)
             print('Guardando los breakpoints de los atributos con valores continuos\n')
-            with open(directory + '/' + breakpoints_file_name, 'w') as breakpoints_file:
+            with open(directory + '/' + breakpoints_file_name_prefix + '.txt', 'w') as breakpoints_file:
                 breakpoints_file.write(str(breakpoints))
             exit()
         elif classifier_type == 'Forest':
@@ -114,8 +116,16 @@ if __name__ == '__main__':
             for i in range(len(trees)):
                 tree_file_name = directory + '/' + classifier_file_name_prefix + str(i) + '.json'
                 print('Guardando árbol del clasificador en {file}\n'.format(file=tree_file_name))
-                ID3.save_tree(trees[i], tree_file_name)
-                exit()
+                ID3.save_tree(trees[i][0], tree_file_name)
+                breakpoints_file_name = directory + '/' + breakpoints_file_name_prefix + str(i) + '.txt'
+                print('Guardando los breakpoints de los atributos con valores continuos en {file}'.format(file=breakpoints_file_name))
+                with open(breakpoints_file_name, 'w') as breakpoints_file:
+                    breakpoints_file.write(str(trees[i][1]))
+                distribution_file_name = directory + '/' + distribution_file_name_prefix + str(i) + '.txt'
+                print('Guardando distribuciones de clases para votación en {file}'.format(file=distribution_file_name))
+                with open(distribution_file_name, 'w') as distribution_file:
+                    distribution_file.write(str(trees[i][2]))
+            exit()
         else:
             print('Main.py: Exception, impossible case.\n')
 
@@ -140,6 +150,8 @@ if __name__ == '__main__':
         data_validation = Data.load_data(dataset_name, directory + '/' + validation_file_name)
 
         trees = []
+        breakpoints = []
+        distributions = []
 
         # Walk through the tree files inside the directory
         for root, dirs, files in os.walk(directory):
@@ -147,31 +159,49 @@ if __name__ == '__main__':
             for i in range(data_validation.amount_classes):
                 tree_file_name = classifier_file_name_prefix + str(i) + '.json'
                 if tree_file_name in files:
-                    print('Loading tree file {file}'.format(file=tree_file_name))
+                    print('Cargando árbol del archivo {file}'.format(file=directory + '/' + tree_file_name))
                     trees.append(ID3.load_tree(directory + '/' + tree_file_name))
                 else:
                     break
-
-        # Evaluate the classifier on the validation data
+                breakpoints_file_name = breakpoints_file_name_prefix + str(i) + '.txt'
+                if breakpoints_file_name in files:
+                    print('Cargando breakpoints del archivo {file}'.format(file=directory + '/' + breakpoints_file_name))
+                    with open(directory + '/' + breakpoints_file_name, 'r') as breakpoints_file:
+                        breakpoints.append((ast.literal_eval((breakpoints_file.read()))))
+                distribution_file_name = distribution_file_name_prefix + str(i) + '.txt'
+                if distribution_file_name in files:
+                    print('Cargando distribuciones de clases del archivo {file}'.format(file=directory + '/' + distribution_file_name))
+                    with open(directory + '/' + distribution_file_name, 'r') as distribution_file:
+                        distributions.append((ast.literal_eval((distribution_file.read()))))
 
         # Single tree classifier
         if len(trees) == 1:
             # Load breakpoints
             print('Cargando breakpoints generados durante el entrenamiento\n')
-            breakpoints = {}
-            with (open(directory + '/' + breakpoints_file_name)) as breakpoints_file:
+            with (open(directory + '/' + breakpoints_file_name_prefix + '.txt')) as breakpoints_file:
                 breakpoints = ast.literal_eval(breakpoints_file.read())
             print('Aplicando breakpoints a los atributos continuos de las instancias de validación\n')
             data_validation.apply_breakpoints(breakpoints)
             print('Ejecutando el clasificador sobre las instancias de validación\n')
             classification = Classifier.classify_dataset_tree(trees[0], data_validation)
-            print('Evaluando clasificador\n')
-            print('Guardando métricas en {file}'.format(file=directory + '/' + evaluation_file_name))
-            Evaluator.evaluate_classificator(classification, data_validation.classes,
-                                             data_validation.dataset, len(data_validation.dataset),
-                                             directory + '/' + evaluation_file_name)
-            exit()
+        # Forest classifier
+        else:
+            classifier = []
+            assert len(trees) == len(breakpoints) and len(breakpoints) == len(distributions)
+            for i in range(len(trees)):
+                classifier.append((trees[i], breakpoints[i], distributions[i]))
+            data_validation_list = []
+            for i in range(len(trees)):
+                data_validation_list.append(copy.deepcopy(data_validation))
+            print('Ejecutando el clasificador sobre las instancias de validación\n')
+            classification = Classifier.classify_dataset_multi_label(classifier, data_validation_list)
 
+        print('Evaluando clasificador\n')
+        print('Guardando métricas en {file}'.format(file=directory + '/' + evaluation_file_name))
+        Evaluator.evaluate_classificator(classification, data_validation.classes,
+                                         data_validation.dataset, len(data_validation.dataset),
+                                         directory + '/' + evaluation_file_name)
+        exit()
     else:
         print('Error. Modo de uso inválido. Los posibles modos de uso son Entrenar y Evaluar\n')
         print(uso_general + uso_entrenar + uso_evaluar)

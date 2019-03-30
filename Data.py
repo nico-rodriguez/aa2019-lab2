@@ -281,9 +281,3 @@ def load_data(dataset_name, file_path):
             data.dataset.append(ast.literal_eval(instance_line))
     data.recalculate_distributions()
     return data
-
-
-if __name__ == '__main__':
-
-    data_iris = Data('iris')
-    print(data_iris.project_attribute(data_iris.attributes[0]))
