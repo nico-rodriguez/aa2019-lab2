@@ -155,113 +155,125 @@ def __ID3(tree, data, parent_attribute, parent_attribute_value,
                          attr=parent_attribute, val=parent_attribute_value)
                          + ",", parent_id)
         return tree, cutting_values
-    # The are no attributes left
-    if data.amount_attributes == 0:
-        # print("--no attrributes left--") debugging
-        # First consider the case where there are no examples left
-        if len(data.dataset) == 0:
-            # Any label is likely (check data.global_class_distribution)
-            sorted_class = weighted_random(data.classes,
-                                           data.global_class_distribution)
-            tree.create_node('Class {c},Instances {inst}'.format(
-                c=sorted_class, inst=0), path_to_parent +
-                'Attribute {attr} = {val}'.format(
-                    attr=parent_attribute,
-                    val=parent_attribute_value) + ",", parent_id)
-            return tree, cutting_values
-        # If there are examples left, sort the label according to the
-        # class distribution known by the parent node
-        else:
-            # Use data.class_distribution to label
-            print(data.dataset)
-            print("----")
-            print(data.class_distribution.keys())
-            print(data.class_distribution.values())
-            sorted_class = weighted_random(
-                data.classes, list(data.class_distribution.values()))
-            tree.create_node('Class {c},Instances {inst}'.format(
-                c=sorted_class, inst=len(data.dataset)), path_to_parent +
-                'Attribute {attr} = {val}'.format(
-                    attr=parent_attribute, val=parent_attribute_value) +
-                ",", parent_id)
-            return tree, cutting_values
-    # There are attributes left
-    elif data.amount_attributes > 0:
-        if len(data.dataset) == 0:
-            # Any label is likely (check data.global_class_distribution)
-            sorted_class = weighted_random(
-                data.classes, list(data.global_class_distribution.values()))
-            tree.create_node('Class {c},Instances {inst}'.format(
-                c=sorted_class, inst=0), path_to_parent +
-                'Attribute {attr} = {val}'.format(
-                    attr=parent_attribute, val=parent_attribute_value) + ",",
-                parent_id)
-            return tree, cutting_values
-        else:
-            # Choose best attribute
-            best_root_attribute_list = []
-            best_profit = None
-            spliting_value_for_attribute = {}
-            for attribute in data.attributes:
-                if data.splitable_attribute(attribute):
-                    spliting_value_for_attribute[attribute] = (
-                        data.best_cutting_value(attribute))
-                    new_profit = profit(data.dataset, attribute,
-                                        [spliting_value_for_attribute[
-                                            attribute]],
-                                        data.classes)
-                else:
-                    new_profit = profit(data.dataset, attribute,
-                                        data.attribute_values[attribute],
-                                        data.classes)
-                # If more than one attributes have equal profit,
-                # choose one at random
-                if (best_profit is None) or (new_profit > best_profit):
-                    best_profit = new_profit
-                    best_root_attribute_list = [attribute]
-                elif (best_profit == new_profit):
-                    best_root_attribute_list.append(attribute)
+    if data.amount_attributes > (12-3):
+        # The are no attributes left
+        if data.amount_attributes == 0:
+            # print("--no attrributes left--") debugging
+            # First consider the case where there are no examples left
+            if len(data.dataset) == 0:
+                # Any label is likely (check data.global_class_distribution)
+                sorted_class = weighted_random(data.classes,
+                                               data.global_class_distribution)
+                tree.create_node('Class {c},Instances {inst}'.format(
+                    c=sorted_class, inst=0), path_to_parent +
+                    'Attribute {attr} = {val}'.format(
+                        attr=parent_attribute,
+                        val=parent_attribute_value) + ",", parent_id)
+                return tree, cutting_values
+            # If there are examples left, sort the label according to the
+            # class distribution known by the parent node
+            else:
+                # Use data.class_distribution to label
+                print(data.dataset)
+                print("----")
+                print(data.class_distribution.keys())
+                print(data.class_distribution.values())
+                sorted_class = weighted_random(
+                    data.classes, list(data.class_distribution.values()))
+                tree.create_node('Class {c},Instances {inst}'.format(
+                    c=sorted_class, inst=len(data.dataset)), path_to_parent +
+                    'Attribute {attr} = {val}'.format(
+                        attr=parent_attribute, val=parent_attribute_value) +
+                    ",", parent_id)
+                return tree, cutting_values
+        # There are attributes left
+        elif data.amount_attributes > 0:
+            # Shorten the tree depth to total_attribute_number / 2 in case of covtype dataset
+            if len(data.dataset) == 0:
+                # Any label is likely (check data.global_class_distribution)
+                sorted_class = weighted_random(
+                    data.classes, list(data.global_class_distribution.values()))
+                tree.create_node('Class {c},Instances {inst}'.format(
+                    c=sorted_class, inst=0), path_to_parent +
+                    'Attribute {attr} = {val}'.format(
+                        attr=parent_attribute, val=parent_attribute_value) + ",",
+                    parent_id)
+                return tree, cutting_values
+            else:
+                # Choose best attribute
+                best_root_attribute_list = []
+                best_profit = None
+                spliting_value_for_attribute = {}
+                for attribute in data.attributes:
+                    if data.splitable_attribute(attribute):
+                        spliting_value_for_attribute[attribute] = (
+                            data.best_cutting_value(attribute))
+                        new_profit = profit(data.dataset, attribute,
+                                            [spliting_value_for_attribute[
+                                                attribute]],
+                                            data.classes)
+                    else:
+                        new_profit = profit(data.dataset, attribute,
+                                            data.attribute_values[attribute],
+                                            data.classes)
+                    # If more than one attributes have equal profit,
+                    # choose one at random
+                    if (best_profit is None) or (new_profit > best_profit):
+                        best_profit = new_profit
+                        best_root_attribute_list = [attribute]
+                    elif best_profit == new_profit:
+                        best_root_attribute_list.append(attribute)
 
-            best_root_attribute = random.choice(best_root_attribute_list)
-            # Create root node for this case
-            tree.create_node('Attribute {attr}'.format(
-                attr=best_root_attribute),
-                path_to_parent + 'Attribute {attr} = {val}'.format(
-                attr=parent_attribute, val=parent_attribute_value) + ",",
-                parent_id)
-            if data.splitable_attribute(best_root_attribute):
-                data.split_attribute(best_root_attribute,
-                                     spliting_value_for_attribute[
-                                        best_root_attribute])
-                cutting_values[best_root_attribute] = (
-                    spliting_value_for_attribute[best_root_attribute])
-            # Generate a branch for each possible value of the attribute
-            filtered_data_dict = data.project_attribute(best_root_attribute)
-            for value in data.attribute_values[best_root_attribute]:
-                # If there are no examples left, sort the label according to
-                # the class distribution known by the parent node
-                if len(filtered_data_dict[value].dataset) == 0:
-                    # Use filtered_data_dict[value].class_distribution to label
-                    sorted_class = weighted_random(
-                        filtered_data_dict[value].classes,
-                        list(filtered_data_dict[
-                            value].class_distribution.values()))
-                    tree.create_node('Class {c},Instances {inst}'.format(
-                        c=sorted_class, inst=len(data.dataset)), path_to_parent
-                        + 'Attribute {attr} = {val}'.format(
-                            attr=parent_attribute, val=parent_attribute_value)
-                        + 'Attribute {attr} = {val}'.format(
-                        attr=best_root_attribute, val=value) + ",",
-                        parent_id)
-                    return tree, cutting_values
-                # Recursive call
-                elif len(filtered_data_dict[value].dataset) > 0:
-                    __ID3(tree, filtered_data_dict[value],
-                          best_root_attribute, value, path_to_parent +
-                          "Attribute {attr} = {val}".format(
-                          attr=parent_attribute,
-                          val=parent_attribute_value) + ",", cutting_values)
-        return tree, cutting_values
-    # Exception
+                best_root_attribute = random.choice(best_root_attribute_list)
+                # Create root node for this case
+                tree.create_node('Attribute {attr}'.format(
+                    attr=best_root_attribute),
+                    path_to_parent + 'Attribute {attr} = {val}'.format(
+                    attr=parent_attribute, val=parent_attribute_value) + ",",
+                    parent_id)
+                # if data.splitable_attribute(best_root_attribute):
+                #     data.split_attribute(best_root_attribute,
+                #                          spliting_value_for_attribute[
+                #                             best_root_attribute])
+                #     cutting_values[best_root_attribute] = (
+                #         spliting_value_for_attribute[best_root_attribute])
+                # Generate a branch for each possible value of the attribute
+                filtered_data_dict = data.project_attribute(best_root_attribute)
+                for value in data.attribute_values[best_root_attribute]:
+                    # If there are no examples left, sort the label according to
+                    # the class distribution known by the parent node
+                    if len(filtered_data_dict[value].dataset) == 0:
+                        # Use filtered_data_dict[value].class_distribution to label
+                        sorted_class = weighted_random(
+                            filtered_data_dict[value].classes,
+                            list(filtered_data_dict[
+                                value].class_distribution.values()))
+                        tree.create_node('Class {c},Instances {inst}'.format(
+                            c=sorted_class, inst=len(data.dataset)), path_to_parent
+                            + 'Attribute {attr} = {val}'.format(
+                                attr=parent_attribute, val=parent_attribute_value)
+                            + 'Attribute {attr} = {val}'.format(
+                            attr=best_root_attribute, val=value) + ",",
+                            parent_id)
+                        return tree, cutting_values
+                    # Recursive call
+                    elif len(filtered_data_dict[value].dataset) > 0:
+                        __ID3(tree, filtered_data_dict[value],
+                              best_root_attribute, value, path_to_parent +
+                              "Attribute {attr} = {val}".format(
+                              attr=parent_attribute,
+                              val=parent_attribute_value) + ",", cutting_values)
+                return tree, cutting_values
+        # Exception
+        else:
+            return "ID3.__ID3: data.amount_attributes can't be negative."
     else:
-        return "ID3.__ID3: data.amount_attributes can't be negative."
+        # Sort the label (check data.class_distribution)
+        sorted_class = weighted_random(data.classes,
+                                       list(data.class_distribution.values()))
+        tree.create_node('Class {c},Instances {inst}'.format(
+            c=sorted_class, inst=data.class_distribution[sorted_class]), path_to_parent +
+                                     'Attribute {attr} = {val}'.format(
+                                         attr=parent_attribute,
+                                         val=parent_attribute_value) + ",", parent_id)
+        return tree, cutting_values

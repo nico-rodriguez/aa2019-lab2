@@ -28,7 +28,7 @@ class Data:
         self.data_name = data_name
         # Indicates if all instances belong to the same class
         self.monoclass_instances = None
-        if (data_name == "iris"):
+        if data_name == "iris":
             self.amount_attributes = 4
             self.attributes = [0, 1, 2, 3]
             self.attribute_values = {
@@ -106,19 +106,19 @@ class Data:
     def best_cutting_value(self, attribute):
         best_cutting_value = None
         best_profit = None
-        '''
+
         if len(self.dataset) > 4:
             random_indices = random.sample(
                 list(range(len(self.dataset))), 4)
         else:
             random_indices = list(range(len(self.dataset)))
-        '''
-        k = int(len(self.dataset)/20)
-        if k == 0:
-            random_indexes = list(range(len(self.dataset)))
-        else:
-            random_indexes = random.sample(list(range(len(self.dataset))), int(len(self.dataset)/4))
-        for i in random_indexes:
+
+        # k = int(len(self.dataset)/20)
+        # if k == 0:
+        #     random_indexes = list(range(len(self.dataset)))
+        # else:
+        #     random_indexes = random.sample(list(range(len(self.dataset))), int(len(self.dataset)/4))
+        for i in random_indices:
             new_profit = Utils.profit(
                 self.dataset, attribute, [self.dataset[i][attribute]],
                 self.classes)
@@ -252,7 +252,7 @@ class Data:
                     data[attribute] = 1
 
     def copy(self):
-        data = Data(self.data_name)
+        data = Data('iris')     # Optimization
         data.dataset = copy.deepcopy(self.dataset)
         data.data_name = self.data_name
         data.amount_attributes = self.amount_attributes
