@@ -120,6 +120,7 @@ if __name__ == '__main__':
             print('Guardando los breakpoints de los atributos con valores continuos\n')
             with open(directory + '/' + breakpoints_file_name_prefix + '.txt', 'w') as breakpoints_file:
                 breakpoints_file.write(str(breakpoints))
+            print(tree)
             exit()
         elif classifier_type == 'Forest':
             trees = Classifier.generate_forest_classifier(data_training)
@@ -209,6 +210,7 @@ if __name__ == '__main__':
 
         print('Evaluando clasificador\n')
         print('Guardando métricas en {file}'.format(file=directory + '/' + evaluation_file_name))
+        print(classification)
         Evaluator.evaluate_classificator(classification, data_validation.classes,
                                          data_validation.dataset, len(data_validation.dataset),
                                          directory + '/' + evaluation_file_name)

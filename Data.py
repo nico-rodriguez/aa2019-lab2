@@ -231,6 +231,7 @@ class Data:
         data_training.amount_classes = self.amount_classes
         data_training.classes = self.classes.copy()
         data_training.class_distribution = self.class_distribution.copy()
+        data_training.global_class_distribution = self.global_class_distribution.copy()
 
         data_validation = Data("iris")
         data_validation.dataset = validation_set
@@ -241,6 +242,7 @@ class Data:
         data_validation.amount_classes = self.amount_classes
         data_validation.classes = self.classes.copy()
         data_validation.class_distribution = self.class_distribution.copy()
+        data_validation.global_class_distribution = self.global_class_distribution.copy()
         return (data_training, data_validation)
 
     def apply_breakpoints(self, breakpoints):
@@ -261,6 +263,7 @@ class Data:
         data.amount_classes = self.amount_classes
         data.classes = self.classes.copy()
         data.class_distribution = self.class_distribution.copy()
+        data.global_class_distribution = self.global_class_distribution.copy()
         return data
 
     '''

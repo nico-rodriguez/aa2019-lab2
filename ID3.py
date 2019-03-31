@@ -20,6 +20,7 @@ import json
 from treelib import Tree
 from Utils import profit, weighted_random
 import random
+import time
 
 
 # Saves the tree in treelib format into target_file in json format
@@ -45,11 +46,13 @@ def __dictionary_to_tree(node_info, tree):
         print('is not leaf')
         root = list(node_info.keys())[0]
         # Split node tag from node id
+        test = root.split(',')
         node_tag = root.split(',')[0]
         node_id = ','.join(root.split(',')[1:])
         parent_id = ','.join(root.split(',')[1:-2]) + ','
         if parent_id == ',':
             parent_id = None
+        print(test)
         print(root)
         print(node_tag)
         print(node_id)
@@ -61,11 +64,13 @@ def __dictionary_to_tree(node_info, tree):
         # Split node tag from node id
         print('is leaf')
         node_name = node_info
+        test = node_name.split(',')
         node_tag = ','.join(node_name.split(',')[0:2]) + ','
         node_id = ','.join(node_name.split(',')[2:])
         parent_id = ','.join(node_name.split(',')[2:-2]) + ','
         if parent_id == ',':
             parent_id = None
+        print(test)
         print(node_info)
         print(node_tag)
         print(node_id)
@@ -129,7 +134,7 @@ following an extension of the ID3 algorithm and the cutting points generated.
 
 def ID3(data):
     tree = Tree()
-    return __ID3(tree, data, None, None, None, {})
+    return __ID3(tree, data, None, None, None, {}, 0)
 
 
 '''
@@ -143,19 +148,28 @@ Returns a decision tree of treelib type.
 
 
 def __ID3(tree, data, parent_attribute, parent_attribute_value,
-          path_to_parent, cutting_values):
-    parent_id = path_to_parent
-    if path_to_parent is None:
-        path_to_parent = ""
-    # All remaining instances belong to the same class
-    if data.monoclass_instances is not None:
+          path_to_parent, cutting_values, depth):
+    if (depth >= 2):
+        random_class = weighted_random(data.classes, data.class_distribution)
         tree.create_node('Class {c},Instances {inst}'.format(
-            c=data.monoclass_instances, inst=len(data.dataset)),
-                         path_to_parent + 'Attribute {attr} = {val}'.format(
-                         attr=parent_attribute, val=parent_attribute_value)
-                         + ",", parent_id)
+                c=random_class, inst=len(data.dataset)),
+                            path_to_parent + 'Attribute {attr} = {val}'.format(
+                            attr=parent_attribute, val=parent_attribute_value)
+                            + ",", path_to_parent)
         return tree, cutting_values
-    if data.amount_attributes > (12-3):
+    else:
+        depth += 1
+        parent_id = path_to_parent
+        if path_to_parent is None:
+            path_to_parent = ""
+        # All remaining instances belong to the same class
+        if data.monoclass_instances is not None:
+            tree.create_node('Class {c},Instances {inst}'.format(
+                c=data.monoclass_instances, inst=len(data.dataset)),
+                            path_to_parent + 'Attribute {attr} = {val}'.format(
+                            attr=parent_attribute, val=parent_attribute_value)
+                            + ",", parent_id)
+            return tree, cutting_values
         # The are no attributes left
         if data.amount_attributes == 0:
             # print("--no attrributes left--") debugging
@@ -163,7 +177,7 @@ def __ID3(tree, data, parent_attribute, parent_attribute_value,
             if len(data.dataset) == 0:
                 # Any label is likely (check data.global_class_distribution)
                 sorted_class = weighted_random(data.classes,
-                                               data.global_class_distribution)
+                                            data.global_class_distribution)
                 tree.create_node('Class {c},Instances {inst}'.format(
                     c=sorted_class, inst=0), path_to_parent +
                     'Attribute {attr} = {val}'.format(
@@ -174,10 +188,6 @@ def __ID3(tree, data, parent_attribute, parent_attribute_value,
             # class distribution known by the parent node
             else:
                 # Use data.class_distribution to label
-                print(data.dataset)
-                print("----")
-                print(data.class_distribution.keys())
-                print(data.class_distribution.values())
                 sorted_class = weighted_random(
                     data.classes, list(data.class_distribution.values()))
                 tree.create_node('Class {c},Instances {inst}'.format(
@@ -187,7 +197,7 @@ def __ID3(tree, data, parent_attribute, parent_attribute_value,
                     ",", parent_id)
                 return tree, cutting_values
         # There are attributes left
-        elif data.amount_attributes > 0:
+        if data.amount_attributes > 0:
             # Shorten the tree depth to total_attribute_number / 2 in case of covtype dataset
             if len(data.dataset) == 0:
                 # Any label is likely (check data.global_class_distribution)
@@ -244,36 +254,37 @@ def __ID3(tree, data, parent_attribute, parent_attribute_value,
                     # the class distribution known by the parent node
                     if len(filtered_data_dict[value].dataset) == 0:
                         # Use filtered_data_dict[value].class_distribution to label
+                        #print(tree)
+                        #print("no tengo datos para el atr " + str(best_root_attribute) + " con el valor " + str(value))
+                        #print(path_to_parent)
+                        #print(parent_attribute)
+                        #print(parent_attribute_value)
+                        #print(parent_id)
+                        #print()
                         sorted_class = weighted_random(
-                            filtered_data_dict[value].classes,
-                            list(filtered_data_dict[
-                                value].class_distribution.values()))
+                            data.classes,
+                            data.global_class_distribution)
+                        print(sorted_class)
                         tree.create_node('Class {c},Instances {inst}'.format(
                             c=sorted_class, inst=len(data.dataset)), path_to_parent
-                            + 'Attribute {attr} = {val}'.format(
+                            + 'Attribute {attr} = {val},'.format(
                                 attr=parent_attribute, val=parent_attribute_value)
                             + 'Attribute {attr} = {val}'.format(
                             attr=best_root_attribute, val=value) + ",",
-                            parent_id)
+                            parent_id + 'Attribute {attr} = {val},'.format(
+                                attr=parent_attribute, val=parent_attribute_value))
+                        #print(tree)
+                        #time.sleep(10)
+                        #print()
                         return tree, cutting_values
                     # Recursive call
                     elif len(filtered_data_dict[value].dataset) > 0:
                         __ID3(tree, filtered_data_dict[value],
-                              best_root_attribute, value, path_to_parent +
-                              "Attribute {attr} = {val}".format(
-                              attr=parent_attribute,
-                              val=parent_attribute_value) + ",", cutting_values)
+                            best_root_attribute, value, path_to_parent +
+                            "Attribute {attr} = {val}".format(
+                            attr=parent_attribute,
+                            val=parent_attribute_value) + ",", cutting_values, depth)
                 return tree, cutting_values
         # Exception
         else:
             return "ID3.__ID3: data.amount_attributes can't be negative."
-    else:
-        # Sort the label (check data.class_distribution)
-        sorted_class = weighted_random(data.classes,
-                                       list(data.class_distribution.values()))
-        tree.create_node('Class {c},Instances {inst}'.format(
-            c=sorted_class, inst=data.class_distribution[sorted_class]), path_to_parent +
-                                     'Attribute {attr} = {val}'.format(
-                                         attr=parent_attribute,
-                                         val=parent_attribute_value) + ",", parent_id)
-        return tree, cutting_values
