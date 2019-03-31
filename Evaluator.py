@@ -45,10 +45,10 @@ def evaluate_classificator(classification, classes,
         amount_instances[c] = 0
 
     for instance in instances:
-        amount_instances[instance[-1]] += 1
+        amount_instances[str(instance[-1])] += 1
 
     for true_class, classified_class in classification:
-        confusion_matrix[classified_class][true_class] += 1
+        confusion_matrix[str(classified_class)][str(true_class)] += 1
 
     precision_macro, recall_macro, fall_out_macro, f_measure_macro = 0, 0, 0, 0
     precision_micro, recall_micro, fall_out_micro, f_measure_micro = 0, 0, 0, 0
