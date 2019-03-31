@@ -158,6 +158,7 @@ class Data:
         for instance in self.dataset:
             # Check the value of the attribute
             instance_attribute_value = instance[attribute]
+            print(instance_attribute_value)
             projected_data = projections_dict[instance_attribute_value]
             # Copy the instance to the corresponding sub dataset
             projected_data.dataset.append(instance.copy())
@@ -290,3 +291,13 @@ def load_data(dataset_name, file_path):
             data.dataset.append(ast.literal_eval(instance_line))
     data.recalculate_distributions()
     return data
+
+
+if __name__ == "__main__":
+    data = Data("iris")
+    for attribute in data.attributes:
+        data.split_attribute(attribute, data.best_cutting_value(attribute))
+    print(data.dataset)
+    with open("processed_data_iris.txt", 'w') as outfile:
+        for instance in data.dataset:
+            outfile.write(str(instance) + "\n")

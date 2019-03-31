@@ -31,7 +31,7 @@ def classify(tree, instance, distribution):
         current_node = tree.get_node(current_path)
         if current_node is None:
             random_class = Utils.weighted_random(
-                list(distribution.keys()), list(distribution.values()))
+                list(distribution.keys()), distribution)
             return ("Class " + str(random_class) + ",Instances "
                     + str(distribution[random_class]))
     return current_node.tag

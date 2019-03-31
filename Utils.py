@@ -138,7 +138,7 @@ returns a randomly selected value following the distribution.
 def weighted_random(values, distribution):
     rand_num = random.random()
     cumulative_distribution = 0
-    for i in range(len(distribution)):
+    for i in distribution.keys():
         cumulative_distribution += distribution[i]
         if rand_num < cumulative_distribution:
-            return values[i]
+            return i
