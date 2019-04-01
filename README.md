@@ -1,4 +1,4 @@
-# Laboratorio 1 del curso Aprendizaje Automático 2019.
+# Laboratorio 2 del curso Aprendizaje Automático 2019.
 Se implementa una extensión del algoritmo ID3 para problemas multi-clase y atributos continuos. Además, se implementan dos tipos de clasificadores:
 - un clasificador basado en un único árbol de decisión
 - otro clasificador basado en varios árboles de decisión (uno por clase), donde cada uno clasifica una clase versus el resto. El clasificador realiza una especie de votación entre las clasificaciones de cada árbol para dar una clasificación final.
