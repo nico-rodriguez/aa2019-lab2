@@ -20,7 +20,6 @@ import json
 from treelib import Tree
 from Utils import profit, weighted_random
 import random
-import time
 
 
 # Saves the tree in treelib format into target_file in json format
@@ -39,11 +38,7 @@ def save_tree(tree, target_file):
 
 # Creates a treelib recursively from a dictionary
 def __dictionary_to_tree(node_info, tree):
-    # print('__dictionary_to_tree')
-    #print(node_info)
-    # print(list(list(node_info.values())[0].keys())[0])
     if isinstance(node_info, dict):
-        #print('is not leaf')
         root = list(node_info.keys())[0]
         # Split node tag from node id
         test = root.split(',')
@@ -52,17 +47,11 @@ def __dictionary_to_tree(node_info, tree):
         parent_id = ','.join(root.split(',')[1:-2]) + ','
         if parent_id == ',':
             parent_id = None
-        # print(test)
-        # print(root)
-        # print(node_tag)
-        # print(node_id)
-        # print(parent_id)
         tree.create_node(node_tag, node_id, parent=parent_id)
         for children in node_info[root]["children"]:
             __dictionary_to_tree(children, tree)
     else:
         # Split node tag from node id
-        # print('is leaf')
         node_name = node_info
         test = node_name.split(',')
         node_tag = ','.join(node_name.split(',')[0:2]) + ','
@@ -70,50 +59,6 @@ def __dictionary_to_tree(node_info, tree):
         parent_id = ','.join(node_name.split(',')[2:-2]) + ','
         if parent_id == ',':
             parent_id = None
-        # print(test)
-        # print(node_info)
-        # print(node_tag)
-        # print(node_id)
-        # print(parent_id)
-        tree.create_node(node_tag, node_id, parent=parent_id)
-        return tree
-    return tree
-
-
-# Creates a treelib recursively from a dictionary
-def __dictionary_to_tree_old(node_info, tree):
-    print('__dictionary_to_tree')
-    print(node_info)
-    print(list(list(node_info.values())[0].keys())[0])
-    if 'children' in list(list(node_info.values())[0].keys())[0]:
-        print('is not leaf')
-        root = list(node_info.keys())[0]
-        # Split node tag from node id
-        node_tag = root.split(',')[0]
-        node_id = ','.join(root.split(',')[1:])
-        parent_id = ','.join(root.split(',')[1:-2]) + ','
-        if parent_id == ',':
-            parent_id = None
-        print(root)
-        print(node_tag)
-        print(node_id)
-        print(parent_id)
-        tree.create_node(node_tag, node_id, parent=parent_id)
-        for children in node_info[root]["children"]:
-            __dictionary_to_tree(children, tree)
-    else:
-        # Split node tag from node id
-        print('is leaf')
-        node_name = list(node_info.keys())[0]
-        node_tag = ','.join(node_name.split(',')[0:2]) + ','
-        node_id = ','.join(node_name.split(',')[2:])
-        parent_id = ','.join(node_name.split(',')[2:-2]) + ','
-        if parent_id == ',':
-            parent_id = None
-        print(node_info)
-        print(node_tag)
-        print(node_id)
-        print(parent_id)
         tree.create_node(node_tag, node_id, parent=parent_id)
         return tree
     return tree
@@ -149,9 +94,7 @@ Returns a decision tree of treelib type.
 
 def __ID3(tree, data, parent_attribute, parent_attribute_value,
           path_to_parent, cutting_values, depth):
-    if (depth >= 2):
-        print(data.classes)
-        print(data.class_distribution)
+    if depth >= 3:
         random_class = weighted_random(data.classes, data.class_distribution)
         tree.create_node('Class {c},Instances {inst}'.format(
                 c=random_class, inst=len(data.dataset)),
@@ -174,7 +117,6 @@ def __ID3(tree, data, parent_attribute, parent_attribute_value,
             return tree, cutting_values
         # The are no attributes left
         if data.amount_attributes == 0:
-            # print("--no attrributes left--") debugging
             # First consider the case where there are no examples left
             if len(data.dataset) == 0:
                 # Any label is likely (check data.global_class_distribution)
@@ -243,31 +185,22 @@ def __ID3(tree, data, parent_attribute, parent_attribute_value,
                     path_to_parent + 'Attribute {attr} = {val}'.format(
                     attr=parent_attribute, val=parent_attribute_value) + ",",
                     parent_id)
-                # if data.splitable_attribute(best_root_attribute):
-                #     data.split_attribute(best_root_attribute,
-                #                          spliting_value_for_attribute[
-                #                             best_root_attribute])
-                #     cutting_values[best_root_attribute] = (
-                #         spliting_value_for_attribute[best_root_attribute])
+                if data.splitable_attribute(best_root_attribute):
+                    data.split_attribute(best_root_attribute,
+                                         spliting_value_for_attribute[
+                                            best_root_attribute])
+                    cutting_values[best_root_attribute] = (
+                        spliting_value_for_attribute[best_root_attribute])
                 # Generate a branch for each possible value of the attribute
-                # print(best_root_attribute)
                 filtered_data_dict = data.project_attribute(best_root_attribute)
                 for value in data.attribute_values[best_root_attribute]:
                     # If there are no examples left, sort the label according to
                     # the class distribution known by the parent node
                     if len(filtered_data_dict[value].dataset) == 0:
                         # Use filtered_data_dict[value].class_distribution to label
-                        #print(tree)
-                        #print("no tengo datos para el atr " + str(best_root_attribute) + " con el valor " + str(value))
-                        #print(path_to_parent)
-                        #print(parent_attribute)
-                        #print(parent_attribute_value)
-                        #print(parent_id)
-                        #print()
                         sorted_class = weighted_random(
                             data.classes,
                             data.global_class_distribution)
-                        print(sorted_class)
                         tree.create_node('Class {c},Instances {inst}'.format(
                             c=sorted_class, inst=len(data.dataset)), path_to_parent
                             + 'Attribute {attr} = {val},'.format(
@@ -276,9 +209,6 @@ def __ID3(tree, data, parent_attribute, parent_attribute_value,
                             attr=best_root_attribute, val=value) + ",",
                             parent_id + 'Attribute {attr} = {val},'.format(
                                 attr=parent_attribute, val=parent_attribute_value))
-                        #print(tree)
-                        #time.sleep(10)
-                        #print()
                         return tree, cutting_values
                     # Recursive call
                     elif len(filtered_data_dict[value].dataset) > 0:

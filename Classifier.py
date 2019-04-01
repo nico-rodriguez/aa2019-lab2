@@ -185,12 +185,3 @@ def generate_classifier(type, training_proportion, dataset, directory):
         data = Data.Data('iris')
         data_training, data_validation = data.divide_corpus(
             training_proportion)
-
-if __name__ == "__main__":
-    # data = Data.Data('iris')
-    # (data_training, data_validation) = data.divide_corpus(0.8)
-    # classifier = generate_forest_classifier(data_training)
-    # tags = classify_dataset_multi_label(classifier, data_validation)
-    # print(tags)
-    data = Data.Data('iris')
-    print(classify_dataset_random(data))

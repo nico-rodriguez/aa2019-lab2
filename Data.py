@@ -113,11 +113,11 @@ class Data:
         else:
             random_indices = list(range(len(self.dataset)))
 
-        # k = int(len(self.dataset)/20)
+        # k = int(len(self.dataset)/100000)
         # if k == 0:
-        #     random_indexes = list(range(len(self.dataset)))
+        #     random_indices = list(range(len(self.dataset)))
         # else:
-        #     random_indexes = random.sample(list(range(len(self.dataset))), int(len(self.dataset)/4))
+        #     random_indices = random.sample(list(range(len(self.dataset))), int(len(self.dataset)/100000))
         for i in random_indices:
             new_profit = Utils.profit(
                 self.dataset, attribute, [self.dataset[i][attribute]],
@@ -158,7 +158,6 @@ class Data:
         for instance in self.dataset:
             # Check the value of the attribute
             instance_attribute_value = instance[attribute]
-            print(instance_attribute_value)
             projected_data = projections_dict[instance_attribute_value]
             # Copy the instance to the corresponding sub dataset
             projected_data.dataset.append(instance.copy())
@@ -244,7 +243,7 @@ class Data:
         data_validation.classes = self.classes.copy()
         data_validation.class_distribution = self.class_distribution.copy()
         data_validation.global_class_distribution = self.global_class_distribution.copy()
-        return (data_training, data_validation)
+        return data_training, data_validation
 
     def apply_breakpoints(self, breakpoints):
         for attribute in breakpoints.keys():
@@ -291,13 +290,3 @@ def load_data(dataset_name, file_path):
             data.dataset.append(ast.literal_eval(instance_line))
     data.recalculate_distributions()
     return data
-
-
-if __name__ == "__main__":
-    data = Data("iris")
-    for attribute in data.attributes:
-        data.split_attribute(attribute, data.best_cutting_value(attribute))
-    print(data.dataset)
-    with open("processed_data_iris.txt", 'w') as outfile:
-        for instance in data.dataset:
-            outfile.write(str(instance) + "\n")
