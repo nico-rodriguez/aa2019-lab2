@@ -214,7 +214,6 @@ if __name__ == '__main__':
 
         print('Evaluando clasificador\n')
         print('Guardando métricas en {file}'.format(file=directory + '/' + evaluation_file_name))
-        print(classification)
         classes = []
         for c in data_validation.classes:
             classes.append(str(c))
