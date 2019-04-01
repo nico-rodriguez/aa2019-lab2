@@ -55,17 +55,17 @@ para calcular las métricas.
 ## Archivos generados
 Al ejecutar el programa en modo *Entrenar*, se genera un directorio con el nombre especificado en *directorio* (si ya existía uno con ese nombre, el programa no realiza el entrenamiento). La estructura del directorio depende del clasificador que se entrena:
 - si es *Single*
-.
+```
 +-- _directorio
 |   +-- breakpoints.txt
 |   +-- classifier0.json
 |   +-- training.txt
 |   +-- validation.txt
-
+```
 donde *breakpoints.txt* contiene los puntos de corte de los atributos con valores continuos; *classifier0.json* contiene el árbol de decisión que se entrenó, de modo de poder cargarlo luego para evaluar sus métricas; *training.txt* contiene las instancias utilizadas para entrenar el clasificador y *validation.txt* contiene las instancias que pueden ser usadas para evaluar el clasificador (recordar que las instancias se separan según el valor del parámetro *training*).
 
 - si es *Forest*
-.
+```
 +-- _directorio
 |   +-- breakpoints0.txt
 |   +-- breakpoints1.txt
@@ -78,7 +78,7 @@ donde *breakpoints.txt* contiene los puntos de corte de los atributos con valore
 ...
 |   +-- training.txt
 |   +-- validation.txt
-
+```
 donde ahora se tiene un archivo *breakpoints_.txt*, *classifier_.txt* y *distribution_.txt* por cada clase (recordar que para este clasificador se tiene un árbol de desición por cada clase). Los archivos *distribution_.txt* contienen las distribuciones de instancias por cada clase dentro del conjunto de entrenamiento utilizado para entrenar dicho árbol de desición.
 
 En ambos casos, luego de invocar el programa en el modo *Evaluar*, se genera un archivo *evaluation.txt* en el mismo directorio con los valores de las métricas y la matriz de confusión para ese clasificador.
