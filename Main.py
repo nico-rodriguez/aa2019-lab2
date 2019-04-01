@@ -64,6 +64,10 @@ if __name__ == '__main__':
     """
 
     # Sanitize arguments
+    if len(sys.argv) < 4:
+        print(uso_general + uso_entrenar + uso_evaluar + uso_evaluar_aleatorio)
+        exit()
+
     mode = sys.argv[1]
     if mode == 'Entrenar':
         if len(sys.argv) != 6:
