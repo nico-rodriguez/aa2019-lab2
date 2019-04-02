@@ -251,7 +251,10 @@ if __name__ == '__main__':
         classification = Classifier.classify_dataset_random(data_validation)
         print('Evaluando clasficador\n')
         print('Guardando métricas en {file}'.format(file=output_file))
-        Evaluator.evaluate_classificator(classification, data_validation.classes,
+        classes = []
+        for c in data_validation.classes:
+            classes.append((str(c)))
+        Evaluator.evaluate_classificator(classification, classes,
                                          data_validation.dataset, len(data_validation.dataset),
                                          output_file)
         exit()

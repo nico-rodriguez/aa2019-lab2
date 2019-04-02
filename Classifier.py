@@ -76,10 +76,12 @@ Returns a list of pairs [label, guess]
 
 def classify_dataset_random(data):
     result = []
+    classes = []
+    for c in data.classes:
+        classes.append(str(c))
     for elem in data.dataset:
-        # random_guess = (random.sample(data.classes, 1))
-        random_guess = Utils.weighted_random(data.classes, list(data.class_distribution.values()))
-        result.append([elem[-1], random_guess])
+        random_guess = Utils.weighted_random(classes, data.class_distribution)
+        result.append([str(elem[-1]), str(random_guess)])
     return result
 
 '''
